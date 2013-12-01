@@ -36,15 +36,18 @@ class ThreatType extends CActiveRecord
 		);
 	}
 
-        public function getCount() 
+        public function getCountAndType($lat, $lng) 
            {
-               $sql = 'select count(*) as count from "tbl_ThreatData"';   
-
+               $sql = 'select "tbl_ThreatType".threat_type as threatid, count("tbl_ThreatData".location) as count from "tbl_ThreatData","tbl_ThreatType" where "tbl_ThreatType".id_type = "tbl_ThreatData".id_threattype and ST_Distance_Sphere(location,ST_MakePoint(:lat, :lng)) < 100 group by "tbl_ThreatType".threat_type
+                        UNION
+                        select NULL,count("tbl_ThreatData".location) as count from "tbl_ThreatData" where ST_Distance_Sphere(location,ST_MakePoint(:lat, :lng)) < 100
+                        order by count desc';
                $connection=Yii::app()->db;
                $command=$connection->createCommand($sql);
+               $command->bindParam(":lat",$lat);
+               $command->bindParam(":lng",$lng);
                $results=$command->queryAll();
-
-               return empty($results[0]['count']) ? 0 : $results[0]['count'];
+               return array('count'=>$results[0]['count'], 'maxcrimetype'=>$results[1]['threatid']);
            }
 	/**
 	 * @return array relational rules.
