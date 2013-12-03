@@ -1,0 +1,42 @@
+#If you modify this file please notify mobile
+#Safety check to ensure that the directory listing doesn't appear
+#if there are no default files to be executed. (index.php or index.html)
+Options -Indexes
+
+RewriteEngine on
+
+##Removing stuff that may hinder with the caching mechanisms.
+Header unset Pragma
+FileETag None
+Header unset ETag
+
+# cache images/pdf docs for 10 days
+<FilesMatch "\.(ico|pdf|jpg|jpeg|png|gif)$">
+  Header set Cache-Control "max-age=864000, public, must-revalidate"
+  Header unset Last-Modified
+</FilesMatch>
+ 
+# cache html/htm/xml/txt files for 2 days
+<FilesMatch "\.(html|htm|xml|txt|xsl)$">
+  Header set Cache-Control "max-age=7200, must-revalidate"
+</FilesMatch>
+
+# if a directory or a file exists, use it directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# otherwise forward it to index.php
+RewriteRule ^(.*)\?*$ index.php/$1 [L,QSA]
+
+
+####################
+# GZIP COMPRESSION #
+####################
+
+SetOutputFilter DEFLATE
+AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/x-javascript application/x-httpd-php text/javascript
+BrowserMatch ^Mozilla/4 gzip-only-text/html
+BrowserMatch ^Mozilla/4\.0[678] no-gzip
+BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
+SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png)$ no-gzip
