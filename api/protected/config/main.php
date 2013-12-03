@@ -36,6 +36,8 @@ return array(
             'rules' => array(
                 'gii' => 'gii',
                 'stacked-area-chart' => 'Home/StackedAreaChart',
+                'temporal-view' => 'Home/TemporalView',
+                'temporal-view-data' => 'Home/GetTemporalData',
                 'gii/<controller:\w+>' => 'gii/<controller>',
                 'gii/<controller:\w+>/<action:\w+>' => 'gii/<controller>/<action>', '<controller:\w+>/<id:\d+>' => '<controller>/view',
                 '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
