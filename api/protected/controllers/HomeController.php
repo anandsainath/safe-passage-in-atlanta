@@ -11,4 +11,8 @@ class HomeController extends Controller {
         $this->render('index');
     }
 
+    public function actionStackedAreaChart() {
+        $this->render('stacked_area_chart');
+    }
+
 }

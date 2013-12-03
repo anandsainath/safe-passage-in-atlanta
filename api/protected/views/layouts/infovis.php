@@ -1,4 +1,4 @@
-<?php //the theme file for the entire site.   ?>
+<?php //the theme file for the entire site.     ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -23,81 +23,81 @@
         <![endif]-->
 
         <script type="text/javascript">
-//            var transitMode = "private";
-//            $(function() {
-//                $('.js-btn').click(function() {
-//                    showNodeLink($(this).attr('id'));
-//                });
-//
-//                $('#sliderBtnLeft').click(function() {
-//                    $('#map-menu').animate({left: '-100%'}, {
-//                        duration: "slow",
-//                        easing: 'swing',
-//                        queue: false,
-//                        complete: function() {
-//                            console.log("Transition is complete!");
-//                        }
-//                    });
-//                });
-//
-//                $('#tempSliderBtnRight').click(function() {
-//                    $('#map-menu').animate({left: "0%"}, {
-//                        duration: "slow",
-//                        easing: "swing",
-//                        queue: false,
-//                        complete: function() {
-//                            console.log("Transition is complete");
-//                        }
-//                    });
-//                    return false;
-//                });
-//
-//                $('#addDestination').click(function() {
-//                    var countOfInput = $('#wayPoints').children().length;
-//                    var charCode = 97 + countOfInput;
-//                    var image = "images/alpha-" + String.fromCharCode(charCode) + ".png";
-//                    var $image = $('<img src="' + image + '" />');
-//                    var $input = $('<input class="form-control js-input" type="text" id="input-' + (countOfInput + 1) + '"/>');
-//                    new google.maps.places.Autocomplete($input[0]);
-//                    var $closeDiv = $('<div class="close js-close"><img src="images/close.png"/></div>');
-//                    var $div = $('<div class="node form-group"></div>');
-//                    $div.append($image).append($input).append($closeDiv);
-//                    $('#wayPoints').append($div);
-//                });
-//
-//                $(document).on('click', '.js-close', function() {
-//                    if ($('#wayPoints').children().length > 2) {
-//                        $(this).parent().remove();
-//                    } else {
-//                        var $input = $(this).siblings('input');
-//                        $input.val("");
-//                    }
-//                    $('#getDirections').trigger('click');
-//                });
-//
-//                $('#getDirections').click(function() {
-//                    doSearch();
-//                });
-//
-//                $('.js-mode-btn').click(function() {
-//                    transitMode = $(this).attr('id');
-//                    doSearch();
-//                });
-//            });
-//
-//            function doSearch() {
-//                if ($('.js-input').length === 2 && ($('.js-input:first').val() === "" || $('.js-input:last').val() === "")) {
-//                    return;
-//                }
-//                var wayPoints = [];
-//                $('.js-input').not(':first').not(':last').each(function(index, value) {
-//                    wayPoints.push({
-//                        location: $(this).val(),
-//                        stopover: false
-//                    });
-//                });
-//                beginSearch($('.js-input:first').val(), $('.js-input:last').val(), wayPoints, transitMode);
-//            }
+            var transitMode = "private";
+            $(function() {
+                $('.js-btn').click(function() {
+                    showNodeLink($(this).attr('id'));
+                });
+
+                $('#sliderBtnLeft').click(function() {
+                    $('#map-menu').animate({left: '-100%'}, {
+                        duration: "slow",
+                        easing: 'swing',
+                        queue: false,
+                        complete: function() {
+                            console.log("Transition is complete!");
+                        }
+                    });
+                });
+
+                $('#tempSliderBtnRight').click(function() {
+                    $('#map-menu').animate({left: "0%"}, {
+                        duration: "slow",
+                        easing: "swing",
+                        queue: false,
+                        complete: function() {
+                            console.log("Transition is complete");
+                            }
+                        });
+                        return false;
+                    });
+
+                    $('#addDestination').click(function() {
+                        var countOfInput = $('#wayPoints').children().length;
+                        var charCode = 97 + countOfInput;
+                        var image = "images/alpha-" + String.fromCharCode(charCode) + ".png";
+                        var $image = $('<img src="' + image + '" />');
+                        var $input = $('<input class="form-control js-input" type="text" id="input-' + (countOfInput + 1) + '"/>');
+                        new google.maps.places.Autocomplete($input[0]);
+                        var $closeDiv = $('<div class="close js-close"><img src="images/close.png"/></div>');
+                        var $div = $('<div class="node form-group"></div>');
+                        $div.append($image).append($input).append($closeDiv);
+                        $('#wayPoints').append($div);
+                    });
+
+                    $(document).on('click', '.js-close', function() {
+                        if ($('#wayPoints').children().length > 2) {
+                            $(this).parent().remove();
+                        } else {
+                            var $input = $(this).siblings('input');
+                            $input.val("");
+                        }
+                        $('#getDirections').trigger('click');
+                    });
+
+                    $('#getDirections').click(function() {
+                        doSearch();
+                    });
+
+                    $('.js-mode-btn').click(function() {
+                        transitMode = $(this).attr('id');
+                        doSearch();
+                    });
+                });
+
+                function doSearch() {
+                    if ($('.js-input').length === 2 && ($('.js-input:first').val() === "" || $('.js-input:last').val() === "")) {
+                        return;
+                    }
+                    var wayPoints = [];
+                    $('.js-input').not(':first').not(':last').each(function(index, value) {
+                        wayPoints.push({
+                            location: $(this).val(),
+                            stopover: false
+                        });
+                    });
+                    beginSearch($('.js-input:first').val(), $('.js-input:last').val(), wayPoints, transitMode);
+                }
         </script>
     </head>
     <body>
@@ -110,25 +110,11 @@
         </div>
 
         <div class="jumbo">
-            
+            <?php echo $content; ?>
         </div>
 
         <nav id="map-menu">
             <div id="top-bar" class="row">
-                <!--<div class="modes">
-                    <span class="button drive">
-                        <img src="images/mode-drive.png"/>
-                    </span>
-                    <span class="button public">
-                        <img src="images/mode-drive.png"/>
-                    </span>
-                    <span class="button walk">
-                        <img src="images/mode-drive.png"/>
-                    </span>
-                    <span class="button cycle">
-                        <img src="images/mode-drive.png"/>
-                    </span>
-                </div>-->
                 <div class="btn-group">
                     <button type="button" id="private" class="btn btn-default js-mode-btn"><img src="images/mode-drive.png"/></button>
                     <button type="button" id="public" class="btn btn-default js-mode-btn"><img src="images/mode-public.png"/></button>
