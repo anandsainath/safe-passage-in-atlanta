@@ -1,0 +1,208 @@
+#map { 
+    display: block;
+    min-height: 100%;
+    overflow: hidden;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.navbar .container {
+    width: 100%;
+}
+
+.jumbo {
+    overflow: hidden;
+    height: 100%;
+    margin-top: 50px;
+    text-align: center;
+    background-color: #EEEEEE;
+}
+
+#map-menu {
+    width: 25%;
+    background: #FFF;
+    border-right: 1px solid #CCC;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    bottom:0px;
+    padding: 30px;
+    overflow: scroll;
+}
+
+#map-menu #top-bar {
+    margin: 0;
+    margin-top: 50px;
+    clear: both;
+    display: block;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #EBEBEB;
+}
+
+#top-bar .arrow {
+    display: inline-block;
+    float: right;
+}
+
+#top-bar .modes {
+    padding: 0px;
+    display: inline-block;
+    float: left;
+}
+
+.modes .button {
+    display: inline-block;
+    background-color: #F5F5F5;
+    background-image: -moz-linear-gradient(center top , #F5F5F5, #F1F1F1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    color: #444444;
+    font-size: 85%;
+    font-weight: bold;
+    height: 27px;
+    line-height: 27px;
+    min-width: 54px;
+    text-align: center;
+    transition: all 0.218s ease 0s;
+}
+
+.modes .button:hover,
+.modes .button:active{
+    background-color: #EEEEEE;
+    background-image: -moz-linear-gradient(center top , #EEEEEE, #E0E0E0);
+    border: 1px solid #CCCCCC;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
+    color: #333333;
+    cursor: pointer;
+}
+
+.modes .button img{
+    vertical-align: center;
+}
+
+#map-menu #places {
+    clear: both;
+    padding: 20px 0;
+    margin: 0;
+    border-bottom: 1px solid #EBEBEB;
+}
+
+#places .node {
+    padding: 8px 0px;
+}
+
+.form-control {
+    width: 220px;
+    display: inline-block;
+}
+
+.form-group {
+    margin-bottom: 0px;
+}
+
+#map-menu #button {
+    clear: both;
+    padding-top: 20px;
+    line-height: 30px;
+}
+
+#map-menu #button button {
+    float: right;
+}
+
+#map-menu #button span {
+    float: left;
+}
+
+#map-menu header span {
+    float: left;
+}
+
+span.link {
+    vertical-align: center;
+    color: #006699;
+}
+
+span.link:hover {
+    text-decoration: underline;
+    color: #009999;
+    cursor: pointer;
+}
+
+.header h5 {
+    display:inline-block;
+    margin-left: 20px;
+}
+
+#map-menu #routes {
+    border-bottom: 1px solid #EBEBEB;
+}
+
+#direction ol {
+    list-style: decimal;
+}
+
+#direction ol, #routes ul{
+    padding: 0 40px;
+}
+
+#routes ul li, #direction ol li{
+    display: block;
+    padding: 10px;
+    border-bottom: 1px solid #EBEBEB;
+    border-top: 1px solid #EBEBEB;
+}
+
+#routes ul li.active, #direction ul li.active, #routes ul li:hover, #direction ol li:hover{
+    background: none repeat scroll 0 0 #EBF2FC;
+}
+
+#routes ul li .road {
+    float: left;
+    clear: both;
+}
+
+#routes ul li .time-miles {
+    float: right;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+#direction ul li.point {
+    border-top: none;
+}
+
+.point {
+    margin-left: 10px;
+    padding: 10px 0;
+}
+
+.point img {
+    float: left;
+}
+
+.point .location {
+    margin-left: 10px;
+    font-weight: bold;
+    display:block;
+    float: left;
+    clear: right;
+}
+
+.point .pin {
+    display:block;
+    clear: left;
+    margin-left: 10px;
+    float:left;
+}
+
+ol li {
+    font-size: 0.9em;
+}
+
+.bold {
+    font-weight: bold;
+}

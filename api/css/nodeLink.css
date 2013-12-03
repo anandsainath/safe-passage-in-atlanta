@@ -1,0 +1,36 @@
+.link {
+    stroke-width: 3px;
+}
+
+.node {
+    fill: #ccc;
+    opacity: 0.90;
+}
+
+.node.fixed {
+    fill: #f00;
+}
+
+.outline {
+    stroke-width: 3px;
+}
+
+.stroke {
+    stroke-width: 3px;
+}
+
+.colwrapper {
+    width: 1024px;
+}
+
+.left {
+    float: left;
+    width: 300px;
+    margin: 0 10px;
+    padding: 10px;
+}
+
+.right{
+    margin: 0 10px;
+    padding: 10px;
+}

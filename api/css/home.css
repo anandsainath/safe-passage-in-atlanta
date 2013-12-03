@@ -1,0 +1,23 @@
+.page-header{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+}
+
+.header-content{
+    font: 13px/27px Arial,sans-serif;
+    height: 30px;
+    position: relative;
+    width: 100%;
+}
+
+.gray{
+	background: none repeat scroll 0 0 #F1F1F1;
+}
+
+body, textarea, input {
+    color: #000000;
+    font-family: arial,helvetica,sans-serif;
+    font-size: 13px;
+}
