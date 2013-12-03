@@ -44,6 +44,7 @@ class HomeController extends Controller {
                     $violent[] = $crime_per_time[array_rand($crime_per_time)];
                     $non_violent[] = $crime_per_time[array_rand($crime_per_time)];
                 }
+                
                 $day_crime_stats["detailed"][] = array(
                     "time" => $time,
                     "violent" => $violent,
