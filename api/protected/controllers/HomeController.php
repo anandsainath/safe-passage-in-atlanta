@@ -22,7 +22,7 @@ class HomeController extends Controller {
         $violent = array(0, 0, 0, 0, 0, 1);
 
         $days_of_week = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
-        $time_of_day = array("Early Morning", "Mid-Day", "Afternoon & Early Evening", "Late Evening");
+        $time_of_day = array("Early Morning", "Mid-Day", "Early Evening", "Late Evening");
 
         foreach ($days_of_week as $day) {
             $day_crime_stats = array(
@@ -32,6 +32,7 @@ class HomeController extends Controller {
             foreach ($time_of_day as $time) {
                 $day_crime_stats["summary"][] = array(
                     "time" => $time,
+                    "day" => $day,
                     "agg" => $crime_overall[array_rand($crime_overall)],
                     "violent" => $violent[array_rand($violent)]
                 );
@@ -44,9 +45,10 @@ class HomeController extends Controller {
                     $violent[] = $crime_per_time[array_rand($crime_per_time)];
                     $non_violent[] = $crime_per_time[array_rand($crime_per_time)];
                 }
-                
+
                 $day_crime_stats["detailed"][] = array(
                     "time" => $time,
+                    "day" => $day,
                     "violent" => $violent,
                     "non_violent" => $non_violent
                 );

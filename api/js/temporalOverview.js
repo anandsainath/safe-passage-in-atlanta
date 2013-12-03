@@ -36,6 +36,10 @@
                     radius: 10
                 }
             },
+            opacity: {
+                shown: 1,
+                hidden: 0.05
+            },
             crimeLevelColors: function() {
 
             }
@@ -93,7 +97,6 @@
                                 .attr("transform", "translate(0,20)")
                                 .each(function(datum, index) {
                                     var dayAggG = d3.select(this);
-
                                     dayAggG.append("text")
                                             .attr("class", "row-heading")
                                             .attr("x", 0)
@@ -108,6 +111,23 @@
                                             .attr("cy", 30)
                                             .attr("r", opts.dimension.crimeCircle.radius)
                                             .attr("style", "fill:" + opts.crimeLevelColors(datum.overall) + "; vector-effect: non-scaling-stroke;");
+                                })
+                                .on("mouseover", function(datum) {
+                                    d3.selectAll('.circleG').style('stroke-opacity', function(o) {
+                                        var thisOpacity = (datum.day === o.day) ? opts.opacity.shown : opts.opacity.hidden;
+                                        d3.select(this).transition()
+                                                .delay(40)
+                                                .style("fill-opacity", thisOpacity);
+                                        return thisOpacity;
+                                    });
+                                })
+                                .on("mouseout", function() {
+                                    d3.selectAll('.circleG').style('stroke-opacity', function() {
+                                        d3.select(this).transition()
+                                                .delay(2)
+                                                .style("fill-opacity", opts.opacity.shown);
+                                        return opts.opacity.shown;
+                                    });
                                 });
                     });
 
@@ -129,7 +149,24 @@
                     })
                     .attr("y", 0)
                     .attr("style", "font-size: 10px; fill: #000000;")
-                    .attr("text-anchor", "middle");
+                    .attr("text-anchor", "middle")
+                    .on("mouseover", function(columnName) {
+                        d3.selectAll('.circleG').style("stroke-opacity", function(o) {
+                            var thisOpacity = (o.time === columnName) ? opts.opacity.shown : opts.opacity.hidden;
+                            d3.select(this).transition()
+                                    .delay(40)
+                                    .style('fill-opacity', thisOpacity);
+                            return thisOpacity;
+                        });
+                    })
+                    .on("mouseout", function() {
+                        d3.selectAll('.circleG').style("stroke-opacity", function() {
+                            d3.select(this).transition()
+                                    .delay(2)
+                                    .style('fill-opacity', opts.opacity.shown);
+                            return opts.opacity.shown;
+                        });
+                    });
 
             boundingRect.append("g").attr("class", "dayBreakupG")
                     .attr("transform", "translate(155, 20)")
