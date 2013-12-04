@@ -16,11 +16,19 @@ html, body {
 .jumbo {
     overflow: hidden;
     height: 100%;
-    margin-top: 50px;
+    padding-top: 30px;
     text-align: center;
     background-color: #EEEEEE;
 }
-
+@media (min-width: 1600px){
+    .jumbo{
+    overflow: hidden;
+    height: 100%;
+    padding-top: 50px;
+    text-align: center;
+    background-color: #EEEEEE;
+  }
+}
 #map-menu {
     width: 25%;
     background: #FFF;
@@ -205,4 +213,8 @@ ol li {
 
 .bold {
     font-weight: bold;
+}
+
+#nav_modes{
+    margin-left: 30px;
 }

@@ -47,6 +47,7 @@ html {
 
 body {
   margin: 0;
+   overflow-x: hidden;
 }
 
 a {
@@ -4318,11 +4319,21 @@ textarea.input-group-sm > .input-group-btn > .btn {
 
 .navbar {
   position: relative;
-  min-height: 50px;
+  max-height: 30px;
+  margin-bottom: 10px;
+  border: 1px solid transparent;
+}
+@media (min-width: 1600px){
+  .navbar {
+  position: relative;
+  max-height: 50px;
   margin-bottom: 20px;
   border: 1px solid transparent;
 }
+}
 
+
+}
 .navbar:before,
 .navbar:after {
   display: table;
@@ -4480,6 +4491,7 @@ textarea.input-group-sm > .input-group-btn > .btn {
   border-width: 0 0 1px;
 }
 
+
 .navbar-fixed-bottom {
   bottom: 0;
   margin-bottom: 0;
@@ -4488,9 +4500,17 @@ textarea.input-group-sm > .input-group-btn > .btn {
 
 .navbar-brand {
   float: left;
+  padding: 5px 15px;
+  font-size: 14px;
+  line-height: 20px;
+}
+@media (min-width: 1600px){
+ .navbar-brand {
+  float: left;
   padding: 15px 15px;
   font-size: 18px;
   line-height: 20px;
+}
 }
 
 .navbar-brand:hover,
