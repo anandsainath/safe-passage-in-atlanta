@@ -19,16 +19,20 @@
             animationDelay: 50,
             dimension: {
                 chartWidth: 630,
-                chartHeight: 620,
+                chartHeight: 520,
+                lockInteraction: false,
+                boundingRect: undefined,
                 padding: {
-                    left: 20,
-                    right: 20,
-                    top: 10,
-                    bottom: 10
+                    left: 10,
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    weekendPadding: 15,
+                    breakupPadding: 112
                 },
                 row: {
                     width: 400,
-                    height: 60
+                    height: 50
                 },
                 crimeSquare: {
                     side: 40
@@ -40,6 +44,23 @@
             },
             crimeLevelColors: function() {
 
+            },
+            onEventOccured: function(eventType, isSelected, eventArgs) {
+            },
+            processEvent: function(event, isSelected, args) {
+                console.log("Inside temporalDetailed.js");
+                switch (event) {
+                    case 'selected-row':
+                        methods.processRowClicked(d3.select(d3.selectAll('.dayAggG')[0][args]), isSelected, args, false);
+                        break;
+                    case 'selected-column':
+                        methods.processColumnClicked(d3.select(d3.selectAll('.column-heading')[0][args]), isSelected, args, false);
+                        break;
+                    case 'selected-item':
+                        var itemCount = args.row_index * 4 + args.col_index;
+                        methods.processItemClicked(d3.select(d3.selectAll('.circleG')[0][itemCount]), isSelected, args, false);
+                        break;
+                }
             }
         },
         /*** GLOBAL Functions ***/
@@ -61,6 +82,21 @@
             opts.crimeLevelColors = crimeLevelColors;
 
             methods.drawViz();
+        },
+        processEvent: function(event, isSelected, args) {
+            console.log("Inside temporalOverview.js");
+            switch (event) {
+                case 'selected-row':
+                    methods.processRowClicked(d3.select(d3.selectAll('.dayAggG')[0][args]), isSelected, args, false);
+                    break;
+                case 'selected-column':
+                    methods.processColumnClicked(d3.select(d3.selectAll('.column-heading')[0][args]), isSelected, args, false);
+                    break;
+                case 'selected-item':
+                    var itemCount = args.row_index * 4 + args.col_index;
+                    methods.processItemClicked(d3.select(d3.selectAll('.circleG')[0][itemCount]), isSelected, args, false);
+                    break;
+            }
         }
         /*** /GLOBAL Functions ***/
     });
@@ -68,6 +104,101 @@
 
     /** Helper functions in the scope of the plugin **/
     var methods = {
+        processColumnClicked: function(_this, isSelected, index, isSource) {
+            var x = 155 + (index * opts.dimension.padding.breakupPadding);
+            if (isSelected) {
+                if (!opts.lockInteraction) {
+                    methods.removeAllSelected();
+                    opts.boundingRect.append("rect")
+                            .attr("class", "selected-column")
+                            .attr("x", x)
+                            .attr("y", 10)
+                            .attr("width", 102)
+                            .attr("height", 390)
+                            .attr("style", "stroke: #2C7FB8; stroke-width: 2px; fill:none; opacity: 0.1")
+                            .transition()
+                            .ease('elastic')
+                            .style("opacity", opts.opacity.shown);
+                    _this.classed('js-clicked', true);
+                    opts.lockInteraction = true;
+                }
+            } else {
+                _this.classed('js-clicked', false);
+                opts.lockInteraction = false;
+                opts.boundingRect.select('.selected-column').remove();
+            }
+
+            if (isSource) {
+                opts.onEventOccured.call(this, 'selected-column', isSelected, index);
+            }
+        },
+        processRowClicked: function(_this, isSelected, datum, isSource) {
+            var y = 22 + (datum * opts.dimension.row.height);
+            if (datum > 4) {
+                y += opts.dimension.padding.weekendPadding;
+            }
+            if (isSelected) {
+                if (!opts.lockInteraction) {
+                    methods.removeAllSelected();
+                    opts.boundingRect.append("rect")
+                            .attr("class", "selected-row")
+                            .attr("x", -9)
+                            .attr("y", y)
+                            .attr("width", opts.dimension.chartWidth - 11)
+                            .attr("height", opts.dimension.row.height + 8)
+                            .attr("style", "stroke: #2C7FB8; stroke-width: 2px; fill:none; opacity: 0.1")
+                            .transition()
+                            .ease('elastic')
+                            .style("opacity", opts.opacity.shown);
+                    _this.classed('js-clicked', true);
+                    opts.lockInteraction = true;
+                }
+            } else {
+                _this.classed('js-clicked', false);
+                opts.lockInteraction = false;
+                opts.boundingRect.select('.selected-row').remove();
+            }
+
+            if (isSource) {
+                opts.onEventOccured.call(this, 'selected-row', isSelected, datum);
+            }
+        },
+        processItemClicked: function(_this, isSelected, datum, isSource) {
+            var x = 155 + (datum.col_index * opts.dimension.padding.breakupPadding);
+            var y = 30 + (datum.row_index * opts.dimension.row.height);
+
+            if (isSelected) {
+                if (!opts.lockInteraction) {
+                    methods.removeAllSelected();
+                    opts.boundingRect.append("rect")
+                            .attr("class", "selected-item")
+                            .attr("x", x)
+                            .attr("y", y)
+                            .attr("width", 102)
+                            .attr("height", 40)
+                            .attr("style", "stroke: #2C7FB8; stroke-width: 2px; fill:none; opacity: 0.1")
+                            .transition()
+                            .ease('elastic')
+                            .style("opacity", opts.opacity.shown);
+                    _this.classed('js-clicked', true);
+                    opts.lockInteraction = true;
+                }
+            } else {
+                _this.classed('js-clicked', false);
+                opts.lockInteraction = false;
+                opts.boundingRect.select('.selected-item').remove();
+            }
+
+            if (isSource) {
+                opts.onEventOccured.call(this, 'selected-item', isSelected, {row_index: datum.row_index, col_index: datum.col_index});
+            }
+        },
+        removeAllSelected: function() {
+            opts.boundingRect.selectAll('.selected-column').remove();
+            opts.boundingRect.selectAll('.selected-row').remove();
+            opts.boundingRect.selectAll('.selected-item').remove();
+            opts.boundingRect.selectAll('.js-clicked').classed('js-clicked', false);
+        },
         drawViz: function() {
             var svg = d3.select(opts.svgSelector)
                     .attr("width", opts.dimension.chartWidth)
@@ -77,13 +208,15 @@
                     .attr("class", "dayWiseSummary")
                     .attr("transform", "translate(" + opts.dimension.padding.left + "," + "40)");
 
+            opts.boundingRect = boundingRect;
+
             boundingRect.selectAll('.dayOverview').data(opts.data).enter()
                     .append("g")
                     .attr("class", "dayOverview")
                     .attr("transform", function(datum, index) {
                         var y = (index * opts.dimension.row.height);
                         if (index > 4) {
-                            y += 30;
+                            y += opts.dimension.padding.weekendPadding;
                         }
                         return "translate(0," + y + ")";
                     })
@@ -111,30 +244,50 @@
                                             .attr("height", opts.dimension.crimeSquare.side)
                                             .attr("style", "fill:" + opts.crimeLevelColors(datum.overall) + "; vector-effect: non-scaling-stroke;");
                                 })
+                                .on("click", function(datum, index) {
+                                    var _this = d3.select(this);
+                                    var thisClass = _this.attr("class");
+                                    var isSelected = (thisClass.indexOf("js-clicked") === -1) ? true : false;
+                                    methods.processRowClicked(_this, isSelected, datum.index, true);
+                                })
                                 .on("mouseover", function(datum) {
-                                    d3.selectAll('.circleG').style('stroke-opacity', function(o) {
-                                        var thisOpacity = (datum.day === o.day) ? opts.opacity.shown : opts.opacity.hidden;
-                                        d3.select(this).transition()
-                                                .delay(40)
-                                                .style("fill-opacity", thisOpacity);
-                                        return thisOpacity;
-                                    });
+                                    if (!opts.lockInteraction) {
+                                        d3.selectAll('.circleG').style('stroke-opacity', function(o) {
+                                            var thisOpacity = (datum.day === o.day) ? opts.opacity.shown : opts.opacity.hidden;
+                                            d3.select(this).transition()
+                                                    .style("fill-opacity", thisOpacity);
+                                            return thisOpacity;
+                                        });
+                                        d3.selectAll('.dayAggG').style('stroke-opacity', function(o) {
+                                            var thisOpacity = (datum.day === o.day) ? opts.opacity.shown : opts.opacity.hidden;
+                                            d3.select(this).transition()
+                                                    .style("fill-opacity", thisOpacity);
+                                            return thisOpacity;
+                                        });
+                                    }
                                 })
                                 .on("mouseout", function() {
-                                    d3.selectAll('.circleG').style('stroke-opacity', function() {
-                                        d3.select(this).transition()
-                                                .delay(2)
-                                                .style("fill-opacity", opts.opacity.shown);
-                                        return opts.opacity.shown;
-                                    });
+                                    if (!opts.lockInteraction) {
+                                        d3.selectAll('.circleG').style('stroke-opacity', function() {
+                                            d3.select(this).transition()
+                                                    .style("fill-opacity", opts.opacity.shown);
+                                            return opts.opacity.shown;
+                                        });
+                                        d3.selectAll('.dayAggG').style('stroke-opacity', function(o) {
+                                            var thisOpacity = opts.opacity.shown;
+                                            d3.select(this).transition()
+                                                    .style("fill-opacity", thisOpacity);
+                                            return thisOpacity;
+                                        });
+                                    }
                                 });
                     });
 
-            boundingRect.selectAll(".columnHeader").data(["Early Morning", "Mid-Day", "Early Evening", "Late Evening"]).enter()
+            boundingRect.selectAll(".column-heading").data(["Morning", "Afternoon", "Evening", "Night"]).enter()
                     .append("text")
-                    .attr("class", "columnHeader")
+                    .attr("class", "column-heading")
                     .attr("x", function(datum, index) {
-                        return 200 + (index * 112);
+                        return 200 + (index * opts.dimension.padding.breakupPadding);
                     })
                     .text(function(datum, index) {
                         return datum;
@@ -143,21 +296,31 @@
                     .attr("style", "font-size: 10px; fill: #000000;")
                     .attr("text-anchor", "middle")
                     .on("mouseover", function(columnName) {
-                        d3.selectAll('.circleG').style("stroke-opacity", function(o) {
-                            var thisOpacity = (o.time === columnName) ? opts.opacity.shown : opts.opacity.hidden;
-                            d3.select(this).transition()
-                                    .delay(40)
-                                    .style('fill-opacity', thisOpacity);
-                            return thisOpacity;
-                        });
+                        if (!opts.lockInteraction) {
+                            d3.selectAll('.circleG').style("stroke-opacity", function(o) {
+                                var thisOpacity = (o.time === columnName) ? opts.opacity.shown : opts.opacity.hidden;
+                                d3.select(this).transition()
+                                        //.delay(40)
+                                        .style('fill-opacity', thisOpacity);
+                                return thisOpacity;
+                            });
+                        }
                     })
                     .on("mouseout", function() {
-                        d3.selectAll('.circleG').style("stroke-opacity", function() {
-                            d3.select(this).transition()
-                                    .delay(2)
-                                    .style('fill-opacity', opts.opacity.shown);
-                            return opts.opacity.shown;
-                        });
+                        if (!opts.lockInteraction) {
+                            d3.selectAll('.circleG').style("stroke-opacity", function() {
+                                d3.select(this).transition()
+                                        //.delay(2)
+                                        .style('fill-opacity', opts.opacity.shown);
+                                return opts.opacity.shown;
+                            });
+                        }
+                    })
+                    .on("click", function(columnName, index) {
+                        var _this = d3.select(this);
+                        var thisClass = _this.attr("class");
+                        var isSelected = (thisClass.indexOf("js-clicked") === -1) ? true : false;
+                        methods.processColumnClicked(_this, isSelected, index, true);
                     });
 
             boundingRect.append("g").attr("class", "dayBreakupG")
@@ -170,7 +333,7 @@
                                 .attr("transform", function(datum, index) {
                                     var y = (index * opts.dimension.row.height);
                                     if (index > 4) {
-                                        y += 30;
+                                        y += opts.dimension.padding.weekendPadding;
                                     }
                                     return "translate(0," + y + ")";
                                 })
@@ -180,7 +343,55 @@
                                             .append("g")
                                             .attr("class", "circleG")
                                             .attr("transform", function(datum, index) {
-                                                return "translate(" + (10 + (index * 112)) + ", 0)";
+                                                return "translate(" + (10 + (index * opts.dimension.padding.breakupPadding)) + ", 0)";
+                                            })
+                                            .on("click", function(datum, index) {
+                                                //console.log(datum);
+                                                var _this = d3.select(this);
+                                                var thisClass = _this.attr("class");
+                                                var isSelected = (thisClass.indexOf("js-clicked") === -1) ? true : false;
+                                                methods.processItemClicked(_this, isSelected, datum, true);
+                                            })
+                                            .on("mouseover", function(datum) {
+                                                if (!opts.lockInteraction) {
+                                                    var day = datum.day,
+                                                            time = datum.time;
+                                                    d3.selectAll('.circleG').style('stroke-opacity', function(datum) {
+                                                        var thisOpacity = (datum.day === day && datum.time === time) ? opts.opacity.shown : opts.opacity.hidden;
+                                                        d3.select(this).transition().style('fill-opacity', thisOpacity);
+                                                        return thisOpacity;
+                                                    });
+                                                    d3.selectAll('.dayAggregate').transition().style('fill-opacity', opts.opacity.hidden);
+                                                    d3.selectAll('.row-heading').style('stroke-opacity', function(datum) {
+                                                        var thisOpacity = (day === datum.day) ? opts.opacity.shown : opts.opacity.hidden;
+                                                        d3.select(this).transition().style('fill-opacity', thisOpacity);
+                                                        return thisOpacity;
+                                                    });
+                                                    d3.selectAll('.column-heading').style('stroke-opacity', function(time) {
+                                                        var thisOpacity = (time === datum.time) ? opts.opacity.shown : opts.opacity.hidden;
+                                                        d3.select(this).transition().style('fill-opacity', thisOpacity);
+                                                        return thisOpacity;
+                                                    });
+                                                }
+                                            })
+                                            .on("mouseout", function() {
+                                                if (!opts.lockInteraction) {
+                                                    d3.selectAll('.circleG').style('stroke-opacity', function() {
+                                                        d3.select(this).transition().style('fill-opacity', opts.opacity.shown);
+                                                        return opts.opacity.shown;
+                                                    });
+                                                    d3.selectAll('.dayAggregate').transition().style('fill-opacity', opts.opacity.shown);
+                                                    d3.selectAll('.row-heading').style('stroke-opacity', function(datum) {
+                                                        var thisOpacity = opts.opacity.shown;
+                                                        d3.select(this).transition().style('fill-opacity', thisOpacity);
+                                                        return thisOpacity;
+                                                    });
+                                                    d3.selectAll('.column-heading').style('stroke-opacity', function(time) {
+                                                        var thisOpacity = opts.opacity.shown;
+                                                        d3.select(this).transition().style('fill-opacity', thisOpacity);
+                                                        return thisOpacity;
+                                                    });
+                                                }
                                             })
                                             .each(function(datum, index) {
                                                 var circleG = d3.select(this);
@@ -188,22 +399,22 @@
 
                                                 circleG.append("line")
                                                         .attr("x1", 0)
-                                                        .attr("y1", ((opts.dimension.row.height / 2) - 1))
+                                                        .attr("y1", ((opts.dimension.crimeSquare.side / 2) - 1) + 10)
                                                         .attr("x2", 102)
-                                                        .attr("y2", ((opts.dimension.row.height / 2) - 1))
+                                                        .attr("y2", ((opts.dimension.crimeSquare.side / 2) - 1) + 10)
                                                         .attr("style", "stroke: #000000; stroke-width: 2px; vector-effect: non-scaling-stroke; fill: none;");
 
-                                                circleG.selectAll(".violent").data(datum.violent).enter()
+                                                circleG.selectAll(".violent").data(datum.total).enter()
                                                         .append("line")
                                                         .attr("x1", function(datum, index) {
                                                             return (2 * index) + (6 * (index + 1));
                                                         })
-                                                        .attr("y1", ((opts.dimension.row.height / 2) - 1))
+                                                        .attr("y1", ((opts.dimension.crimeSquare.side / 2) - 1) + 10)
                                                         .attr("x2", function(datum, index) {
                                                             return (2 * index) + (6 * (index + 1));
                                                         })
                                                         .attr("y2", function(datum, index) {
-                                                            return ((opts.dimension.row.height / 2) - 1) - violentCrimeScale(datum);
+                                                            return ((opts.dimension.crimeSquare.side / 2) - 1) - violentCrimeScale(datum) + 10;
                                                         })
                                                         .transition()
                                                         .ease('elastic')
@@ -213,17 +424,17 @@
                                                         .duration(opts.animationDelay)
                                                         .attr("style", "stroke: #000000; stroke-width: 2px; vector-effect: non-scaling-stroke; fill: none;");
 
-                                                circleG.selectAll(".non-violent").data(datum.non_violent).enter()
+                                                circleG.selectAll(".non-violent").data(datum.violent).enter()
                                                         .append("line")
                                                         .attr("x1", function(datum, index) {
                                                             return (2 * index) + (6 * (index + 1));
                                                         })
-                                                        .attr("y1", ((opts.dimension.row.height / 2) - 1))
+                                                        .attr("y1", ((opts.dimension.crimeSquare.side / 2) - 1) + 10)
                                                         .attr("x2", function(datum, index) {
                                                             return (2 * index) + (6 * (index + 1));
                                                         })
                                                         .attr("y2", function(datum, index) {
-                                                            return ((opts.dimension.row.height / 2) - 1) + violentCrimeScale(datum);
+                                                            return ((opts.dimension.crimeSquare.side / 2) - 1) + violentCrimeScale(datum) + 10;
                                                         })
                                                         .transition()
                                                         .ease('elastic')
@@ -238,13 +449,13 @@
 
             boundingRect.append("line").attr("class", "xDivider")
                     .attr("x1", 0)
-                    .attr("y1", 480)
+                    .attr("y1", 405)
                     .attr("x2", opts.dimension.chartWidth)
-                    .attr("y2", 480)
+                    .attr("y2", 405)
                     .attr("style", "stroke: #000000; stroke-width: 1px; vector-effect: non-scaling-stroke; fill: none; stroke-dasharray: 12px, 2px;");
 
             boundingRect.append("g").attr("class", "key")
-                    .attr("transform", "translate(0,485)")
+                    .attr("transform", "translate(0,415)")
                     .each(function(datum, index) {
                         var key = d3.select(this);
                         key.selectAll('.keyCircle').data([1 / 7, 2 / 7, 3 / 7, 4 / 7, 5 / 7, 6 / 7, 1]).enter()
@@ -333,7 +544,7 @@
                                 })
                                 .attr("style", "stroke: #000000; stroke-width: 2px; vector-effect: non-scaling-stroke; fill: none;");
 
-                        key.selectAll(".legendNonViolent").data([1, 0, 0, 2, 0, 1, 1, 2, 2, 3, 1, 0]).enter()
+                        key.selectAll(".legendNonViolent").data([2, 1, 1, 3, 0, 2, 1, 3, 2, 4, 1, 0]).enter()
                                 .append("line")
                                 .attr("class", "legendNonViolent")
                                 .attr("x1", function(datum, index) {

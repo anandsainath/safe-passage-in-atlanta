@@ -14,12 +14,20 @@ $cs->registerScriptFile($base_url . '/js/temporalDetailed.js', CClientScript::PO
         $.getJSON("http://dev.infovis.com/temporal-view-data", function(data) {
             $.temporalOverview({
                 svgSelector: '#viz > svg',
-                data: data
+                data: data,
+                onEventOccured: function(eventType, isSelected, eventArgs) {
+                    console.log(eventType, isSelected, eventArgs);
+                    $.temporalDetailed.processEvent(eventType, isSelected, eventArgs);
+                }
             });
 
             $.temporalDetailed({
                 svgSelector: '#detail > svg',
-                data: data
+                data: data,
+                onEventOccured: function(eventType, isSelected, eventArgs) {
+                    console.log("Inside temporal.php");
+                    $.temporalOverview.processEvent(eventType, isSelected, eventArgs);
+                }
             });
         });
     });

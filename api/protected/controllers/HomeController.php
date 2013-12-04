@@ -23,10 +23,12 @@ class HomeController extends Controller {
 
         $days_of_week = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
         $time_of_day = array("Early Morning", "Mid-Day", "Early Evening", "Late Evening");
-
+        $index = 0;
         foreach ($days_of_week as $day) {
+            $col_index = 0;
             $day_crime_stats = array(
                 "day" => $day,
+                "index" => $index,
                 "overall" => $crime_overall[array_rand($crime_overall)]
             );
             foreach ($time_of_day as $time) {
@@ -34,10 +36,14 @@ class HomeController extends Controller {
                     "time" => $time,
                     "day" => $day,
                     "agg" => $crime_overall[array_rand($crime_overall)],
-                    "violent" => $violent[array_rand($violent)]
+                    "violent" => $violent[array_rand($violent)],
+                    "row_index" => $index,
+                    "col_index" => $col_index
                 );
+                $col_index++;
             }
 
+            $col_index = 0;
             foreach ($time_of_day as $time) {
                 $violent = array();
                 $non_violent = array();
@@ -50,9 +56,13 @@ class HomeController extends Controller {
                     "time" => $time,
                     "day" => $day,
                     "violent" => $violent,
-                    "non_violent" => $non_violent
+                    "non_violent" => $non_violent,
+                    "row_index" => $index,
+                    "col_index" => $col_index
                 );
+                $col_index++;
             }
+            $index++;
             $temporal[] = $day_crime_stats;
         }
         echo CJSON::encode($temporal);

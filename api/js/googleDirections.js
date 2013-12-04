@@ -40,7 +40,8 @@
         },
         getDirections: function(from, to) {
             from = from || "470 16th St, Atlanta, GA";
-            to = to || "48 5th St NW, Atlanta, GA";
+            to = to || "Atlanta International Airport";
+            //to = to || "48 5th Street Northwest, Atlanta, GA";
             var directionsService = new google.maps.DirectionsService();
             var routeOptions = {
                 origin: from,

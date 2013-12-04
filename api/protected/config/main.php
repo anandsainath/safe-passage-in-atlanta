@@ -39,7 +39,7 @@ return array(
                 'gii' => 'gii',
                 'stacked-area-chart' => 'Home/StackedAreaChart',
                 'temporal-view' => 'Home/TemporalView',
-                'temporal-view-data' => 'Home/GetTemporalData',
+                'temporal-view-data' => 'Threat/TemporalGraph',
                 'gii/<controller:\w+>' => 'gii/<controller>',
                 'gii/<controller:\w+>/<action:\w+>' => 'gii/<controller>/<action>', '<controller:\w+>/<id:\d+>' => '<controller>/view',
                 '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
@@ -51,9 +51,9 @@ return array(
 //		),
         // uncomment the following to use a MySQL database
         'db' => array(
-            'connectionString' => 'pgsql:host=localhost;port=5432;dbname=postgres',
+            'connectionString' => 'pgsql:host=localhost;port=5432;dbname=db_crimeatlanta',
             'username' => 'postgres',
-            'password' => 'infovis',
+            'password' => 'irhtayag',
             'charset' => 'utf8',
         ),
         'errorHandler' => array(

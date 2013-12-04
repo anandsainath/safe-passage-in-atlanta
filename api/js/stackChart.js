@@ -17,11 +17,11 @@
             directions: undefined,
             svgSelector: undefined,
             dimension: {
-                chartWidth: 650,
-                chartHeight: 400,
+                chartWidth: 1200,
+                chartHeight: 225,
                 xPadding: 20,
                 stackedChart: {
-                    height: 250
+                    height: 175
                 },
                 xAxis: {
                     height: 20
