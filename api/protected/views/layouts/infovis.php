@@ -8,7 +8,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script src="lib/d3.min.js"></script>
         <!-- Bootstrap -->
-        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
         <link type="text/css" href="css/custom.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="css/nodeLink.css">
 
@@ -112,10 +112,12 @@
         <div class="jumbo">
             <?php echo $content; ?>
         </div>
-
+        <span class="arrow" id="sliderBtnOpen">
+                    <img src="images/arrow-left.png"/>
+                </span>
         <nav id="map-menu">
             <div id="top-bar" class="row">
-                <div class="btn-group">
+                <div class="btn-group" id="nav_modes">
                     <button type="button" id="private" class="btn btn-default js-mode-btn"><img src="images/mode-drive.png"/></button>
                     <button type="button" id="public" class="btn btn-default js-mode-btn"><img src="images/mode-public.png"/></button>
                     <button type="button" id="walk" class="btn btn-default js-mode-btn"><img src="images/mode-walk.png"/></button>
