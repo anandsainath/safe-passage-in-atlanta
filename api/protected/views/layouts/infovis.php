@@ -163,7 +163,7 @@
 
 		<div class="jumbo">
 			<?php echo $content; ?>
-			<div id="blocks">
+			<!-- <div id="blocks">
 				<ul>
 					<li>
 						jvjjjjjcgch
@@ -196,7 +196,7 @@
 
 				<h2 class="demoHeaders">Slider</h2>
 
-			</div>
+			</div> -->
 		</div>
 
 		<nav id="map-menu">
