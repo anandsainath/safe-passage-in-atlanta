@@ -11,7 +11,6 @@
 		<link href="bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link type="text/css" href="css/custom.css" rel="stylesheet">
 		<link rel="stylesheet" type="text/css" href="css/nodeLink.css">
-
 		<link href="css/ui-lightness/jquery-ui-1.10.3.custom.css" rel="stylesheet">
 
 		<script src="js/jquery-ui-1.10.3.custom.js"></script>
