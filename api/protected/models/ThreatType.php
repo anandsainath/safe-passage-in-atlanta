@@ -43,6 +43,46 @@ class ThreatType extends CActiveRecord {
         $line_string .= ']),4326)';
         return $line_string;
     }
+    
+    public function getNodeLinkData($routes)
+        {
+            //INSERT all values into temo table
+            $sql_insert = 'INSERT INTO "temp_NodeLink" VALUES ';
+            foreach($routes as $route)
+            {
+                foreach($route['points'] as $point)
+                {
+                    $values[] = '(DEFAULT,ST_SetSRID(ST_MakePoint('.$point['latitude'].','.$point['longitude'].'),4326), '.$route['route'].')';
+                }
+            }
+            
+            $sql_insert = $sql_insert.implode(',', $values);
+            $connection=Yii::app()->db;
+            $command=$connection->createCommand($sql_insert);
+            $command->queryAll();
+            
+            
+            //Query Data from the DB
+            $sql_select = 'WITH tempData AS (SELECT * FROM "temp_NodeLink") 
+                            SELECT DISTINCT ON (tempData.routeid,tempData.order)
+                            tempData.routeid as id,ST_X(ST_PointOnSurface(tempData.location)) as lat,ST_Y(ST_PointOnSurface(tempData.location)) as long,threat.id_threattype as threat,COUNT(*) AS count
+                              FROM  tempData,"tbl_ThreatData" as threat
+                              WHERE ST_DWithin(threat.location,tempData.location ,.001)
+                              GROUP BY threat.id_threattype,tempData.routeid,tempData.order,tempData.location
+                              ORDER BY tempData.routeid,tempData.order,count DESC';
+            
+            $connection=Yii::app()->db;
+            $command=$connection->createCommand($sql_select);
+            $results=$command->queryAll();
+            
+            //DELETE data from the temp table
+            $sql_delete = 'DELETE FROM "temp_NodeLink"';
+            $connection=Yii::app()->db;
+            $command=$connection->createCommand($sql_delete);
+            $command->queryAll();
+            
+            return $results;
+        }
 
     //dei poda
     public function getSparklineData($routes) {

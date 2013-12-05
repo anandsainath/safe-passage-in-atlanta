@@ -26,15 +26,15 @@ class ThreatController extends Controller
                             'major' => 'true'
                         );
                         foreach ($leg['steps'] as $step) {
-                            foreach ($step['path'] as $path) {
-                                $latitude = $path['ob'];
-                                $longitude = $path['pb'];
-                                $points[] = array(
-                                    'latitude' => $latitude,
-                                    'longitude' => $longitude,
-                                    'major' => 'false'
-                                );
-                            }
+//                            foreach ($step['path'] as $path) {
+//                                $latitude = $path['ob'];
+//                                $longitude = $path['pb'];
+//                                $points[] = array(
+//                                    'latitude' => $latitude,
+//                                    'longitude' => $longitude,
+//                                    'major' => 'false'
+//                                );
+//                         }
                             $latitude = $step['end_location']['ob'];
                             $longitude = $step['end_location']['pb'];
                             $points[] = array(
@@ -49,9 +49,23 @@ class ThreatController extends Controller
                         'points' => $points
                     );
                 }
-                $nodeArray = ThreatType::model()->getSparklineData($routes[0]);
-//                echo CJSON::encode($nodeArray).  var_dump($json);
-                echo $nodeArray;
+                $nodeArray = ThreatType::model()->getNodeLinkData($routes);
+                
+                $max = 0;
+                foreach($nodeArray as $node)
+                {
+                    if ($max < $node['count'])
+                    {
+                        $max = $node['count'];
+                    }
+                }
+                for ($i=0; $i<count($nodeArray); $i++)
+                {   
+                    $nodeArray[$i]['count'] = ($nodeArray[$i]['count']/$max)*15 + 15;
+                }
+                
+                echo $max;
+                echo CJSON::encode($nodeArray);
         }
 
         protected function parseRoutes($json_string) {
