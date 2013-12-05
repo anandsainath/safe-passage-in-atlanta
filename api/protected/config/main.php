@@ -38,6 +38,7 @@ return array(
             'rules' => array(
                 'gii' => 'gii',
                 'stacked-area-chart' => 'Home/StackedAreaChart',
+                'get-data' => 'Threat/GetData',
                 'temporal-view' => 'Home/TemporalView',
                 'temporal-view-data' => 'Threat/TemporalGraph',
                 'gii/<controller:\w+>' => 'gii/<controller>',
@@ -53,7 +54,7 @@ return array(
         'db' => array(
             'connectionString' => 'pgsql:host=localhost;port=5432;dbname=db_crimeatlanta',
             'username' => 'postgres',
-            'password' => 'irhtayag',
+            'password' => 'infovis',
             'charset' => 'utf8',
         ),
         'errorHandler' => array(
