@@ -63,7 +63,7 @@ html, body {
 	position: absolute;
 	left: 0;
 	top: 30px;
-	padding: 10px;
+	padding: 15px;
 	
 	display: none;
 }
@@ -77,7 +77,7 @@ html, body {
 	position: absolute;
 	left: 0;
 	top: 50px;
-	padding: 10px;
+	padding: 15px;
 	
 	display: none;
 }
@@ -267,24 +267,66 @@ ol li {
 	float: right;
 }
 
-#blocks ul {
+#use-case-route{
+	position: absolute;
+	right:0;
+	top: 30px;
+	width: 500px;
+}
+#use-case-route ul {
 	list-style-type: none;
 	margin: 0px;
 	padding: 0px;
 }
 
-#blocks li {
+#use-case-route li {
 	display: inline-block;
+	border: 1px solid #B3B3B3;
 	vertical-align: top;
-	width: 280px;
+	padding-top: 130px;
+	width: 150px;
+	height:150px;
+	font-weight: bold;
+	color: #222;
+text-shadow: 0px 1px 1px #555;
+
+	/*background-image:url("../images/nodeLink1.png");*/
 	background-color: #ff9933;
-	padding: 13px;
 	margin: 0px 0px 20px 19px;
 }
 
+/* Different backgrounds for grid items*/
+#use-case-route li:nth-child(1)  {
+	background-image:url("../images/screenshots/1.png");
+	
+}
+
+#use-case-route li:nth-child(2)  {
+	background-image:url("../images/screenshots/2.png");
+	
+}
+
+#use-case-route li:nth-child(3)  {
+	background-image:url("../images/screenshots/3.png");
+	
+}
+#use-case-route li:nth-child(4)  {
+	background-image:url("../images/screenshots/4.png");
+	
+}
+#use-case-route li:nth-child(5)  {
+	background-image:url("../images/screenshots/5.png");
+	
+}
+#use-case-route li:nth-child(6)  {
+	background-image:url("../images/screenshots/6.png");
+	
+}
+
+
 #radiusSlider {
 	margin-top: 7px;
-	margin-left: 15px;
+	margin-left: 5px;
 	width: 100px;
 }
 @media (min-width: 1600px) {
@@ -295,5 +337,10 @@ ol li {
 
 }
 
-
-   
+#right-bar{
+right:0%; 
+position: absolute;
+  }
+ #threshold{
+ 	width: 100px;
+ } 

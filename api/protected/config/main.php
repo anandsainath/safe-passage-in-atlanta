@@ -54,7 +54,7 @@ return array(
         'db' => array(
             'connectionString' => 'pgsql:host=localhost;port=5432;dbname=db_crimeatlanta',
             'username' => 'postgres',
-            'password' => 'infovis',
+            'password' => 'irhtayag',
             'charset' => 'utf8',
         ),
         'errorHandler' => array(

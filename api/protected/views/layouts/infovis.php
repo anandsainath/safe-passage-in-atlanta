@@ -1,7 +1,7 @@
-
 <?php //the theme file for the entire site. ?>
 <!DOCTYPE html>
 <html>
+
 	<head>
 		<title>Safe Passage in Atlanta</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,8 +25,78 @@
 		<![endif]-->
 
 		<script type="text/javascript">
-			$(document).ready(function() {
-				
+			var transitMode = "drive", nodeLinkMode = 'actual';
+
+			function dateToString(today) {
+				var dd = today.getDate();
+				var mm = today.getMonth() + 1;
+				//January is 0!
+
+				var yyyy = today.getFullYear();
+
+				if (dd < 10) {
+					dd = '0' + dd
+				}
+				if (mm < 10) {
+					mm = '0' + mm
+				}
+				var result = mm + '/' + dd + '/' + yyyy;
+				return result;
+				//console.log(result);
+
+			}
+
+			function getOption(sel) {
+
+				if (sel.options[sel.selectedIndex].value == "Last month") {
+					var start = new Date();
+					var end = new Date();
+					start.setMonth(start.getMonth() - 1);
+					var startString = dateToString(start);
+					var endString = dateToString(end);
+					console.log(startString);
+					console.log(endString);
+
+				}else if(sel.options[sel.selectedIndex].value == "Last year"){
+					var start = new Date();
+					var end = new Date();
+					start.setMonth(start.getMonth() - 12);
+					var startString = dateToString(start);
+					var endString = dateToString(end);
+					console.log(startString);
+					console.log(endString);
+					
+				}else if(sel.options[sel.selectedIndex].value == "Last 2 years"){
+					var start = new Date();
+					var end = new Date();
+					start.setMonth(start.getMonth() - 24);
+					var startString = dateToString(start);
+					var endString = dateToString(end);
+					console.log(startString);
+					console.log(endString);
+				} else {
+
+					console.log(sel.options[sel.selectedIndex].value);
+				}
+
+			}
+
+			$(function() {
+				$.googleDirections({
+					onDataLoaded : function() {
+						if ($('#page1').is(":visible")) {
+							showNodeLink(nodeLinkMode);
+						}
+						$('.modal').hide();
+					},
+					onError : function(status) {
+						if ($('#page1').is(":visible")) {
+							showError(status);
+						}
+						$('.modal').hide();
+					}
+				});
+
 				$("#slider").slider({
 					animate : true,
 					range : "min",
@@ -34,23 +104,19 @@
 					min : 100,
 					max : 500,
 					step : 100,
-
-				
+					create : function(event, ui) {
+						$("#threshold").html("Threshold : 100");
+					},
 					change : function(event, ui) {
-						
-						console.log(ui.value);
-						
+						$("#threshold").html("Threshold : " + ui.value);
+						console.log((ui.value)/1000);
+
 					}
 				});
-			});
 
-		</script>
-
-		<script type="text/javascript">
-			var transitMode = "private";
-			$(function() {
 				$('.js-btn').click(function() {
-					showNodeLink($(this).attr('id'));
+					nodeLinkMode = $(this).attr('id');
+					showNodeLink(nodeLinkMode);
 				});
 
 				$('#sliderBtnLeft').click(function() {
@@ -62,15 +128,13 @@
 						queue : false,
 						complete : function() {
 							console.log("Transition is complete!");
-							$("#open-tab").show();
-
+							$("#open-tab").show("fast");
 						}
 					});
 				});
 
 				$('#sliderBtnRight').click(function() {
-					$("#open-tab").hide();
-					console.log("Transition is complete!");
+					$("#open-tab").hide("fast");
 					$('#map-menu').animate({
 						left : '-0%'
 					}, {
@@ -108,6 +172,19 @@
 					$('#getDirections').trigger('click');
 				});
 
+				$(document).on("click", '#suggestedRoutesList > li', function() {
+					$('.modal').show();
+					var routeID = $(this).data('route');
+					$('#sliderBtnLeft').trigger('click');
+					$('#page1').fadeOut('slow', function() {
+						$(this).hide();
+						$('#right-bar').hide();
+						$('#page2').fadeIn('slow', function() {
+							loadPage2(routeID);
+						});
+					});
+				});
+
 				$('#getDirections').click(function() {
 					doSearch();
 				});
@@ -118,7 +195,57 @@
 				});
 			});
 
+			function loadPage2(routeID) {
+				$('#stackedAreaChart > svg').children().remove();
+				$('#overview > svg').children().remove();
+				$('#detailed > svg').children().remove();
+
+				$.stackChart({
+					svgSelector : '#stackedAreaChart > svg',
+					directions : $.googleDirections.getRoutes()
+				});
+				$.stackChart.showStackedChart(routeID);
+
+				$.getJSON("http://dev.infovis.com/temporal-view-data", function(data) {
+					$.temporalOverview({
+						svgSelector : '#overview > svg',
+						data : data,
+						onEventOccured : function(eventType, isSelected, eventArgs) {
+							console.log(eventType, isSelected, eventArgs);
+							$.temporalDetailed.processEvent(eventType, isSelected, eventArgs);
+						}
+					});
+
+					$.temporalDetailed({
+						svgSelector : '#detailed > svg',
+						data : data,
+						onEventOccured : function(eventType, isSelected, eventArgs) {
+							$.temporalOverview.processEvent(eventType, isSelected, eventArgs);
+						}
+					});
+				});
+
+				$('.js-tab-btn').click(function() {
+					var targetID = $(this).data('href');
+					$('.js-active-tab').fadeOut('slow', function() {
+						$(this).removeClass('js-active-tab').hide();
+						$(targetID).fadeIn('slow', function() {
+							$(this).addClass('js-active-tab').show();
+						});
+					});
+				});
+				$('.modal').hide();
+			}
+
+			function googleMapsInitialized() {
+				//function called once the google maps has been initialized..
+				$('.js-input').each(function(index, value) {
+					new google.maps.places.Autocomplete($(this)[0]);
+				});
+			}
+
 			function doSearch() {
+				$('.modal').show();
 				if ($('.js-input').length === 2 && ($('.js-input:first').val() === "" || $('.js-input:last').val() === "")) {
 					return;
 				}
@@ -129,85 +256,52 @@
 						stopover : false
 					});
 				});
-				beginSearch($('.js-input:first').val(), $('.js-input:last').val(), wayPoints, transitMode);
+
+				$.googleDirections.getDirections($('.js-input:first').val(), $('.js-input:last').val(), wayPoints, transitMode);
 			}
 		</script>
 	</head>
 	<body>
+		<div class="modal"></div>
 		<div role="navigation" class="navbar navbar-inverse navbar-fixed-top">
 			<div class="container">
 				<div class="navbar-header">
 					<a href="#" class="navbar-brand" id="tempSliderBtnRight">Safe Passages in Atlanta</a>
-
 				</div>
-				
-					
 
 				<div id = "radiusSlider" class="nav pull-right">
-
 					<div id="slider"></div>
 
 				</div>
-<p class="navbar-text navbar-right">Threshold: </p>
+				<p class="navbar-text navbar-right" id="threshold">
+					Threshold:
+				</p>
+
 				<div id = "timeSelector" class="nav pull-right">
 
-					<select class="form-control">
-						<option>Last week</option>
+					<select class="form-control" onchange="getOption(this)">
+						<option>All Time</option>
 						<option>Last month</option>
 						<option>Last year</option>
 						<option>Last 2 years</option>
 					</select>
 
 				</div>
-				<p class="navbar-text navbar-right">time period: </p>
+				<p class="navbar-text navbar-right">
+					Time period:
+				</p>
 
 			</div>
 		</div>
 
 		<div class="jumbo">
 			<?php echo $content; ?>
-			<!-- <div id="blocks">
-				<ul>
-					<li>
-						jvjjjjjcgch
-					</li>
-					<li>
-						jhcvjvcjcjcv
-					</li>
-					<li>
-						chvcjcjcjgccjcj
-					</li>
-					<li>
-						jvjjjjjcgch
-					</li>
-					<li>
-						jhcvjvcjcjcv
-					</li>
-					<li>
-						chvcjcjcjgccjcj
-					</li>
-					<li>
-						jvjjjjjcgch
-					</li>
-					<li>
-						jhcvjvcjcjcv
-					</li>
-					<li>
-						chvcjcjcjgccjcj
-					</li>
-				</ul>
-
-				<h2 class="demoHeaders">Slider</h2>
-
-			</div> -->
 		</div>
 
 		<nav id="map-menu">
 			<div id="top-bar" class="row">
 				<div class="btn-group" id="nav_modes">
-					<button type="button" id="private" class="btn btn-default js-mode-btn"><img src="images/mode-drive.png"/>
-					</button>
-					<button type="button" id="public" class="btn btn-default js-mode-btn"><img src="images/mode-public.png"/>
+					<button type="button" id="drive" class="btn btn-default js-mode-btn"><img src="images/mode-drive.png"/>
 					</button>
 					<button type="button" id="walk" class="btn btn-default js-mode-btn"><img src="images/mode-walk.png"/>
 					</button>
@@ -289,7 +383,7 @@
 		<nav id="open-tab">
 
 			<div class="arrow" id="sliderBtnRight">
-				<img src="images/arrow-right.png"/>
+				<span class="glyphicon glyphicon-th-large"></span>
 			</div>
 		</nav>
 	</body>
