@@ -44,6 +44,7 @@ class ThreatType extends CActiveRecord {
         return $line_string;
     }
 
+    //dei poda
     public function getSparklineData($routes) {
         $outputs = array();
         
