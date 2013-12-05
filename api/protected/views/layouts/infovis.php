@@ -140,13 +140,15 @@
 					<a href="#" class="navbar-brand" id="tempSliderBtnRight">Safe Passages in Atlanta</a>
 
 				</div>
+				
+					
 
 				<div id = "radiusSlider" class="nav pull-right">
 
 					<div id="slider"></div>
 
 				</div>
-
+<p class="navbar-text navbar-right">Threshold: </p>
 				<div id = "timeSelector" class="nav pull-right">
 
 					<select class="form-control">
@@ -157,6 +159,7 @@
 					</select>
 
 				</div>
+				<p class="navbar-text navbar-right">time period: </p>
 
 			</div>
 		</div>
