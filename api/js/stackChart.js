@@ -66,6 +66,12 @@
                     .attr("width", opts.dimension.chartWidth)
                     .attr("height", opts.dimension.chartHeight);
 
+            opts.tip = d3.tip().attr('class', 'd3-tip').html(function() {
+                return opts.tipData;
+            });
+
+            svg.call(opts.tip);
+
             svg.append("svg")
                     .attr("class", "stack-chart")
                     .attr("x", opts.dimension.xPadding)
@@ -136,7 +142,12 @@
                     .attr("y", opts.dimension.chartHeight - opts.dimension.xAxis.height - opts.dimension.marker.yPadding - 4)
                     .attr("width", opts.dimension.wayPoint.width)
                     .attr("height", opts.dimension.wayPoint.height)
-                    .attr("style", "stroke: #000000; stroke-width: 2px; vector-effect: non-scaling-stroke; fill: #FFFFFF;");
+                    .attr("style", "stroke: #000000; stroke-width: 2px; vector-effect: non-scaling-stroke; fill: #FFFFFF;")
+                    .on("mouseover", function(datum, index) {
+                        opts.tipData = datum.instructions;
+                        opts.tip.show.call(this);
+                    })
+                    .on("mouseout", opts.tip.hide);
 
             svg.selectAll(".distanceMarkers").data(distanceMarkers).enter()
                     .append("text")
@@ -158,11 +169,12 @@
     /** Helper functions in the scope of the plugin **/
     var methods = {
         computeOverviewCoordinates: function(routeNum, totalDistance) {
+
             var overview_path = opts.directions.routes[routeNum].overview_path;
             var pathDistance = 0, temp, multiplier;
             var wayPoints = [];
             for (var index = 0; index < overview_path.length - 1; index++) {
-                temp = Math.sqrt(Math.pow((overview_path[index + 1].pb - overview_path[index].pb), 2) + Math.pow((overview_path[index + 1].ob - overview_path[index].ob), 2));
+                temp = Math.sqrt(Math.pow((overview_path[index + 1].qb - overview_path[index].qb), 2) + Math.pow((overview_path[index + 1].pb - overview_path[index].pb), 2));
                 pathDistance += temp;
                 wayPoints.push(pathDistance);
             }

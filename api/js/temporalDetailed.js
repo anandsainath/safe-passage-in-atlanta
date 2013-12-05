@@ -404,6 +404,7 @@
                                                         .attr("y2", ((opts.dimension.crimeSquare.side / 2) - 1) + 10)
                                                         .attr("style", "stroke: #000000; stroke-width: 2px; vector-effect: non-scaling-stroke; fill: none;");
 
+
                                                 circleG.selectAll(".violent").data(datum.total).enter()
                                                         .append("line")
                                                         .attr("x1", function(datum, index) {

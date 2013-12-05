@@ -19,6 +19,9 @@
             GOOGLE_MAPS_API_KEY: "AIzaSyCYqCxPtH-HeBNSp6yHUfHAuVaMLbccqv4",
             onDataLoaded: function(data) {
                 console.log(data);
+            },
+            onError: function(status) {
+
             }
         },
         /*** GLOBAL Functions ***/
@@ -38,18 +41,37 @@
             script.src = "http://maps.googleapis.com/maps/api/js?key=" + opts.GOOGLE_MAPS_API_KEY + "&sensor=false&callback=googleMapsInitialized&libraries=places";
             document.body.appendChild(script);
         },
-        getDirections: function(from, to) {
+        getDirections: function(from, to, wayPoints, mode) {
             from = from || "470 16th St, Atlanta, GA";
             to = to || "Atlanta International Airport";
-            //to = to || "48 5th Street Northwest, Atlanta, GA";
+            mode = mode || 'drive';
+
+            var travelMode;
+            console.log(from, to, mode);
+            switch (mode) {
+                case 'drive':
+                    travelMode = google.maps.TravelMode.DRIVING;
+                    break;
+                case 'cycle':
+                    travelMode = google.maps.TravelMode.BICYCLING;
+                    break;
+                case 'walk':
+                    travelMode = google.maps.TravelMode.WALKING;
+                    break;
+            }
+
             var directionsService = new google.maps.DirectionsService();
             var routeOptions = {
                 origin: from,
                 destination: to,
                 provideRouteAlternatives: true,
-                travelMode: google.maps.TravelMode.DRIVING,
+                travelMode: travelMode,
                 unitSystem: google.maps.UnitSystem.IMPERIAL
             };
+
+            if (wayPoints && wayPoints.length > 0) {
+                routeOptions.waypoints = wayPoints;
+            }
 
             directionsService.route(routeOptions, function(result, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
@@ -58,8 +80,13 @@
                     if (opts.debug) {
                         console.log(result);
                     }
+                } else {
+                    opts.onError.call(this, status);
                 }
             });
+        },
+        getRoutes: function() {
+            return opts.mapDirections;
         }
         /*** /GLOBAL Functions ***/
     });

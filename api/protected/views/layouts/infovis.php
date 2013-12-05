@@ -1,4 +1,4 @@
-<?php //the theme file for the entire site.     ?>
+<?php //the theme file for the entire site.                                                      ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -23,10 +23,27 @@
         <![endif]-->
 
         <script type="text/javascript">
-            var transitMode = "private";
+            var transitMode = "drive",
+                    nodeLinkMode = 'actual';
             $(function() {
+                $.googleDirections({
+                    onDataLoaded: function(data) {
+                        if ($('#page1').is(":visible")) {
+                            showNodeLink(nodeLinkMode);
+                        }
+                        $('.modal').hide();
+                    },
+                    onError: function(status) {
+                        if ($('#page1').is(":visible")) {
+                            showError(status);
+                        }
+                        $('.modal').hide();
+                    }
+                });
+
                 $('.js-btn').click(function() {
-                    showNodeLink($(this).attr('id'));
+                    nodeLinkMode = $(this).attr('id');
+                    showNodeLink(nodeLinkMode);
                 });
 
                 $('#sliderBtnLeft').click(function() {
@@ -47,60 +64,130 @@
                         queue: false,
                         complete: function() {
                             console.log("Transition is complete");
-                            }
-                        });
-                        return false;
-                    });
-
-                    $('#addDestination').click(function() {
-                        var countOfInput = $('#wayPoints').children().length;
-                        var charCode = 97 + countOfInput;
-                        var image = "images/alpha-" + String.fromCharCode(charCode) + ".png";
-                        var $image = $('<img src="' + image + '" />');
-                        var $input = $('<input class="form-control js-input" type="text" id="input-' + (countOfInput + 1) + '"/>');
-                        new google.maps.places.Autocomplete($input[0]);
-                        var $closeDiv = $('<div class="close js-close"><img src="images/close.png"/></div>');
-                        var $div = $('<div class="node form-group"></div>');
-                        $div.append($image).append($input).append($closeDiv);
-                        $('#wayPoints').append($div);
-                    });
-
-                    $(document).on('click', '.js-close', function() {
-                        if ($('#wayPoints').children().length > 2) {
-                            $(this).parent().remove();
-                        } else {
-                            var $input = $(this).siblings('input');
-                            $input.val("");
                         }
-                        $('#getDirections').trigger('click');
+                    });
+                    return false;
+                });
+
+                $('#addDestination').click(function() {
+                    var countOfInput = $('#wayPoints').children().length;
+                    var charCode = 97 + countOfInput;
+                    var image = "images/alpha-" + String.fromCharCode(charCode) + ".png";
+                    var $image = $('<img src="' + image + '" />');
+                    var $input = $('<input class="form-control js-input" type="text" id="input-' + (countOfInput + 1) + '"/>');
+                    new google.maps.places.Autocomplete($input[0]);
+                    var $closeDiv = $('<div class="close js-close"><img src="images/close.png"/></div>');
+                    var $div = $('<div class="node form-group"></div>');
+                    $div.append($image).append($input).append($closeDiv);
+                    $('#wayPoints').append($div);
+                });
+
+                $(document).on('click', '.js-close', function() {
+                    if ($('#wayPoints').children().length > 2) {
+                        $(this).parent().remove();
+                    } else {
+                        var $input = $(this).siblings('input');
+                        $input.val("");
+                    }
+                    $('#getDirections').trigger('click');
+                });
+
+                $('#getDirections').click(function() {
+                    doSearch();
+                });
+
+                $('.js-mode-btn').click(function() {
+                    transitMode = $(this).attr('id');
+                    doSearch();
+                });
+
+                $(document).on("click", '#suggestedRoutesList > li', function() {
+                    $('.modal').show();
+                    var routeID = $(this).data('route');
+                    $('#sliderBtnLeft').trigger('click');
+                    $('#page1').fadeOut('slow', function() {
+                        $(this).hide();
+                        $('#right-bar').hide();
+                        $('#page2').fadeIn('slow', function() {
+                            loadPage2(routeID);
+                        });
+                    });
+                });
+            });
+
+            function loadPage2(routeID) {
+                $('#stackedAreaChart > svg').children().remove();
+                $('#overview > svg').children().remove();
+                $('#detailed > svg').children().remove();
+
+                console.log($.googleDirections.getRoutes());
+
+                $.stackChart({
+                    svgSelector: '#stackedAreaChart > svg',
+                    directions: $.googleDirections.getRoutes()
+                });
+                $.stackChart.showStackedChart(routeID);
+
+                $.getJSON("http://dev.infovis.com/temporal-view-data", function(data) {
+                    console.log(data);
+                    $.temporalOverview({
+                        svgSelector: '#overview > svg',
+                        data: data,
+                        onEventOccured: function(eventType, isSelected, eventArgs) {
+                            console.log(eventType, isSelected, eventArgs);
+                            $.temporalDetailed.processEvent(eventType, isSelected, eventArgs);
+                        }
                     });
 
-                    $('#getDirections').click(function() {
-                        doSearch();
-                    });
-
-                    $('.js-mode-btn').click(function() {
-                        transitMode = $(this).attr('id');
-                        doSearch();
+                    $.temporalDetailed({
+                        svgSelector: '#detailed > svg',
+                        data: data,
+                        onEventOccured: function(eventType, isSelected, eventArgs) {
+                            $.temporalOverview.processEvent(eventType, isSelected, eventArgs);
+                        }
                     });
                 });
 
-                function doSearch() {
-                    if ($('.js-input').length === 2 && ($('.js-input:first').val() === "" || $('.js-input:last').val() === "")) {
-                        return;
-                    }
-                    var wayPoints = [];
-                    $('.js-input').not(':first').not(':last').each(function(index, value) {
-                        wayPoints.push({
-                            location: $(this).val(),
-                            stopover: false
+                $('.js-tab-btn').click(function() {
+                    var targetID = $(this).data('href');
+                    $('.js-active-tab').fadeOut('slow', function() {
+                        $(this).removeClass('js-active-tab').hide();
+                        $(targetID).fadeIn('slow', function() {
+                            $(this).addClass('js-active-tab').show();
                         });
                     });
-                    beginSearch($('.js-input:first').val(), $('.js-input:last').val(), wayPoints, transitMode);
+                });
+
+                $('.modal').hide();
+            }
+
+            function googleMapsInitialized() {
+                //function called once the google maps has been initialized..
+                console.log("initialize called");
+                $('.js-input').each(function(index, value) {
+                    new google.maps.places.Autocomplete($(this)[0]);
+                });
+            }
+
+            function doSearch() {
+                $('.modal').show();
+                if ($('.js-input').length === 2 && ($('.js-input:first').val() === "" || $('.js-input:last').val() === "")) {
+                    return;
                 }
+                var wayPoints = [];
+                $('.js-input').not(':first').not(':last').each(function(index, value) {
+                    wayPoints.push({
+                        location: $(this).val(),
+                        stopover: false
+                    });
+                });
+
+                $.googleDirections.getDirections($('.js-input:first').val(), $('.js-input:last').val(), wayPoints, transitMode);
+            }
         </script>
     </head>
     <body>
+        <div class="modal"></div>
         <div role="navigation" class="navbar navbar-inverse navbar-fixed-top">
             <div class="container">
                 <div class="navbar-header">
@@ -113,13 +200,12 @@
             <?php echo $content; ?>
         </div>
         <span class="arrow" id="sliderBtnOpen">
-                    <img src="images/arrow-left.png"/>
-                </span>
+            <img src="images/arrow-left.png"/>
+        </span>
         <nav id="map-menu">
             <div id="top-bar" class="row">
                 <div class="btn-group" id="nav_modes">
-                    <button type="button" id="private" class="btn btn-default js-mode-btn"><img src="images/mode-drive.png"/></button>
-                    <button type="button" id="public" class="btn btn-default js-mode-btn"><img src="images/mode-public.png"/></button>
+                    <button type="button" id="drive" class="btn btn-default js-mode-btn"><img src="images/mode-drive.png"/></button>
                     <button type="button" id="walk" class="btn btn-default js-mode-btn"><img src="images/mode-walk.png"/></button>
                     <button type="button" id="cycle" class="btn btn-default js-mode-btn"><img src="images/mode-cycle.png"/></button>
                 </div>
@@ -158,43 +244,7 @@
                     </span>
                     <h5>Suggested Routes</h5>
                 </div>
-
                 <ul class="list-unstyled" id='suggestedRoutesList'></ul>
-            </div>
-
-            <div id="direction" class="row hidden">
-                <div class="header">
-                    <h5>
-                        Driving Direction to Atlanta Airport
-                    </h5>
-                </div>
-                <div class="point row">
-                    <img src="images/start.png"/>
-                    <div class="pull-left">
-                        <span class="location">I-75/I-85 S </span>
-                        <span class="pin">Atlanta, GA, 30363 </span>
-                    </div>
-                </div>
-                <ol>
-                    <li class="row"> 
-                        <span>1. <span class="bold">16th St NW</span> turns slightly right and becomes Techwood Dr NW</span>
-                    </li>
-                    <li class="row"> 
-                        <span>1. <span class="bold">16th St NW</span> turns slightly right and becomes Techwood Dr NW</span>
-                    </li>
-                    <li class="row"> 
-                        <span>1. <span class="bold">16th St NW</span> turns slightly right and becomes Techwood Dr NW</span>
-                    </li><li class="row"> 
-                        <span>1. <span class="bold">16th St NW</span> turns slightly right and becomes Techwood Dr NW</span>
-                    </li>
-                </ol>
-                <div class="point row">
-                    <img src="images/start.png"/>
-                    <div class="pull-left">
-                        <span class="location">Hartsfield Jackson Atlanta Airport</span>
-                        <span class="pin">6000 N Terminal Pkwy, Atlanta, GA 30320 </span>
-                    </div>
-                </div>
             </div>
         </nav>
     </body>

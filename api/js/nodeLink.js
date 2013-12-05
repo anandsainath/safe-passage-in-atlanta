@@ -17,13 +17,6 @@ var link, node, svg;
 var linkedByIndex;
 var directionsService = undefined;
 
-$(function() {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = "http://maps.googleapis.com/maps/api/js?key=" + GOOGLE_MAPS_API_KEY + "&sensor=false&callback=initialize&libraries=places";
-    document.body.appendChild(script);
-});
-
 function forwardAlpha(layout, alpha, max) {
     alpha = alpha || 0;
     max = max || 1000;
@@ -40,57 +33,57 @@ function initialize() {
     });
 }
 
-function beginSearch(origin, destination, wayPoints, transitMode) {
-    console.log(origin, destination, wayPoints, transitMode);
-    minX = 100, maxX = -100, minY = 100, maxY = -100;
-    if (directionsService) {
-        var travelMode = google.maps.TravelMode.DRIVING;
-        switch (transitMode) {
-            case "private":
-                travelMode = google.maps.TravelMode.DRIVING;
-                break;
-            case "public":
-                travelMode = google.maps.TravelMode.TRANSIT;
-                break;
-            case "walk":
-                travelMode = google.maps.TravelMode.WALKING;
-                break;
-            case "cycle":
-                travelMode = google.maps.TravelMode.BICYCLING;
-                break;
-        }
-
-        $('#nodeLink svg').children().remove();
-        var routeOptions = {
-            origin: origin,
-            destination: destination,
-            waypoints: wayPoints,
-            provideRouteAlternatives: true,
-            travelMode: travelMode,
-            unitSystem: google.maps.UnitSystem.IMPERIAL
-        };
-
-        console.log(routeOptions);
-
-        directionsService.route(routeOptions, function(result, status) {
-            if (status === google.maps.DirectionsStatus.OK) {
-                mapDirections = result;
-                console.log(mapDirections);
-                showRouteSummary();
-                showNodeLink(ACTUAL_REPRESENTATION);
-            } else {
-                switch (status) {
-                    case "ZERO_RESULTS":
-                        $('#suggestedRoutesList').empty().append('<li> No results found! </li>');
-                        break;
-                    default:
-                        $('#suggestedRoutesList').empty().append('<li> ' + status + ' </li>');
-                }
-            }
-        });
-    }
-
-}
+//function beginSearch(origin, destination, wayPoints, transitMode) {
+//    console.log(origin, destination, wayPoints, transitMode);
+//    minX = 100, maxX = -100, minY = 100, maxY = -100;
+//    if (directionsService) {
+//        var travelMode = google.maps.TravelMode.DRIVING;
+//        switch (transitMode) {
+//            case "private":
+//                travelMode = google.maps.TravelMode.DRIVING;
+//                break;
+//            case "public":
+//                travelMode = google.maps.TravelMode.TRANSIT;
+//                break;
+//            case "walk":
+//                travelMode = google.maps.TravelMode.WALKING;
+//                break;
+//            case "cycle":
+//                travelMode = google.maps.TravelMode.BICYCLING;
+//                break;
+//        }
+//
+//        $('#nodeLink svg').children().remove();
+//        var routeOptions = {
+//            origin: origin,
+//            destination: destination,
+//            waypoints: wayPoints,
+//            provideRouteAlternatives: true,
+//            travelMode: travelMode,
+//            unitSystem: google.maps.UnitSystem.IMPERIAL
+//        };
+//
+//        console.log(routeOptions);
+//
+//        directionsService.route(routeOptions, function(result, status) {
+//            if (status === google.maps.DirectionsStatus.OK) {
+//                mapDirections = result;
+//                console.log(mapDirections);
+//                showRouteSummary();
+//                showNodeLink(ACTUAL_REPRESENTATION);
+//            } else {
+//                switch (status) {
+//                    case "ZERO_RESULTS":
+//                        $('#suggestedRoutesList').empty().append('<li> No results found! </li>');
+//                        break;
+//                    default:
+//                        $('#suggestedRoutesList').empty().append('<li> ' + status + ' </li>');
+//                }
+//            }
+//        });
+//    }
+//
+//}
 
 function showRouteSummary() {
     var $ol = $('#suggestedRoutesList').empty();
@@ -98,7 +91,7 @@ function showRouteSummary() {
         var $roadSpan = $('<span class="road">' + data.summary + '</span>');
         var $timeSpan = $('<span class="time-miles">' + data.legs[0].distance.text + ", " + data.legs[0].duration.text + '</span>');
 
-        var $li = $('<li class="row"></li>');
+        var $li = $('<li class="row" data-route="'+index+'"></li>');
         $li.append($roadSpan).append($timeSpan);
 
         $li.hover(function() {
@@ -112,6 +105,7 @@ function showRouteSummary() {
 }
 
 function showNodeLink(representation) {
+    minX = 100, maxX = -100, minY = 100, maxY = -100;
     switch (representation) {
         case ACTUAL_REPRESENTATION:
             showActualRepresentation = true;
@@ -121,8 +115,21 @@ function showNodeLink(representation) {
             break;
     }
     $('#nodeLink svg').children().remove();
+
+    mapDirections = $.googleDirections.getRoutes();
+    showRouteSummary();
     var json = getNodeRepresentation(mapDirections);
     drawForceDirectedNodeLink(json);
+}
+
+function showError(status) {
+    switch (status) {
+        case "ZERO_RESULTS":
+            $('#suggestedRoutesList').empty().append('<li> No results found! </li>');
+            break;
+        default:
+            $('#suggestedRoutesList').empty().append('<li> ' + status + ' </li>');
+    }
 }
 
 function getMinMax(x, y) {
@@ -204,9 +211,9 @@ function drawForceDirectedNodeLink(graph) {
             .size([width, height])
             .charge(-300)
             .gravity(0.05);
-    
+
     forwardAlpha(force);
-    
+
     force.on("tick", function(parameter) {
 
         $('.outline').remove();
@@ -420,8 +427,8 @@ function getNodeRepresentation(result) {
             var spoint, spos, epoint, epos;
             if (step_num == 0) {
                 //adding the starting location here..
-                getMinMax(step.start_point.pb, step.start_point.ob);
-                spoint = {"x": step.start_point.pb, "y": step.start_point.ob, "fixed": true, "route": [routeCount]};
+                getMinMax(step.start_point.qb, step.start_point.pb);
+                spoint = {"x": step.start_point.qb, "y": step.start_point.pb, "fixed": true, "route": [routeCount]};
                 spos = getIndex(nodes, spoint);
                 if (spos == INVALID_INDEX) {
                     spos = nodes.length;
@@ -432,8 +439,8 @@ function getNodeRepresentation(result) {
                     nodes[spos]["route"].push(routeCount);
                 }
             }
-            getMinMax(step.end_point.pb, step.end_point.ob);
-            epoint = {"x": step.end_point.pb, "y": step.end_point.ob, "count": 1, "route": [routeCount]};
+            getMinMax(step.end_point.qb, step.end_point.pb);
+            epoint = {"x": step.end_point.qb, "y": step.end_point.pb, "count": 1, "route": [routeCount]};
             if ((routeStepSize - 1) == step_num) {
                 epoint["fixed"] = true;
                 endPoint = epoint;
