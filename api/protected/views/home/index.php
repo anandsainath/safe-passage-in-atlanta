@@ -25,6 +25,7 @@ $cs->registerScriptFile($base_url . '/js/temporalDetailed.js', CClientScript::PO
 <script type="text/javascript">
     $(function() {
         $(document).on('click', '#use-case-route > li', function() {
+            $('.modal').show();
             var data = $(this).data('route');
             var wayPoints = data.route;
             var from = wayPoints.splice(0, 1)[0],

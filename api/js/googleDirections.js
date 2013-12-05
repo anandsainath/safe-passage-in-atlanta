@@ -17,8 +17,8 @@
             debug: true,
             mapDirections: undefined,
             GOOGLE_MAPS_API_KEY: "AIzaSyCYqCxPtH-HeBNSp6yHUfHAuVaMLbccqv4",
-            onDataLoaded: function(data) {
-                console.log(data);
+            onDataLoaded: function() {
+
             },
             onError: function(status) {
 
@@ -47,7 +47,6 @@
             mode = mode || 'drive';
 
             var travelMode;
-            console.log(from, to, mode);
             switch (mode) {
                 case 'drive':
                     travelMode = google.maps.TravelMode.DRIVING;
@@ -76,7 +75,13 @@
             directionsService.route(routeOptions, function(result, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
                     opts.mapDirections = result;
-                    opts.onDataLoaded.call(this, result);
+
+                    $.post('http://dev.infovis.com/get-data', {"json_string": JSON.stringify(result)}, function(data) {
+                        opts.jsonData = $.parseJSON(data);
+                        opts.onDataLoaded.call(this);
+                        console.log(opts.jsonData);
+                    });
+
                     if (opts.debug) {
                         console.log(result);
                     }
@@ -87,6 +92,12 @@
         },
         getRoutes: function() {
             return opts.mapDirections;
+        },
+        getNodeLinkData: function() {
+            return opts.jsonData.nodelink;
+        },
+        getTemporalData: function() {
+            return opts.jsonData.temporal;
         }
         /*** /GLOBAL Functions ***/
     });
