@@ -1,220 +1,314 @@
-#map { 
-    display: block;
-    min-height: 100%;
-    overflow: hidden;
+#map {
+	display: block;
+	min-height: 100%;
+	overflow: hidden;
 }
 
 html, body {
-    height: 100%;
-    margin: 0;
+	height: 100%;
+	margin: 0;
 }
 
 .navbar .container {
-    width: 100%;
+	width: 100%;
 }
 
 .jumbo {
-    overflow: hidden;
-    height: 100%;
-    padding-top: 30px;
-    text-align: center;
-    background-color: #EEEEEE;
+	overflow: hidden;
+	height: 100%;
+	padding-top: 30px;
+	text-align: center;
+	background-color: #EEEEEE;
 }
-@media (min-width: 1600px){
-    .jumbo{
-    overflow: hidden;
-    height: 100%;
-    padding-top: 50px;
-    text-align: center;
-    background-color: #EEEEEE;
-  }
+@media (min-width: 1600px) {
+	.jumbo {
+		overflow: hidden;
+		height: 100%;
+		padding-top: 50px;
+		text-align: center;
+		background-color: #EEEEEE;
+	}
 }
 #map-menu {
-    width: 25%;
-    background: #FFF;
-    border-right: 1px solid #CCC;
-    height: 100%;
-    position: absolute;
-    left: 0;
-    bottom:0px;
-    padding: 30px;
-    overflow: scroll;
+	width: 25%;
+	background: #FFF;
+	border-right: 1px solid #CCC;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	bottom: 0px;
+	padding: 30px;
+	overflow: scroll;
+}
+
+#open-tab {
+
+	background: #FFF;
+	border-right: 1px solid #CCC;
+	height: 50px;
+	position: absolute;
+	left: 0;
+	top: 30px;
+	padding: 10px;
+	padding-top:20px;
+	display: none;
+}
+
+@media (min-width: 1600px){
+	#open-tab {
+
+	background: #FFF;
+	border-right: 1px solid #CCC;
+	height: 50px;
+	position: absolute;
+	left: 0;
+	top: 50px;
+	padding: 10px;
+	padding-top:20px;
+	display: none;
+}
+	
 }
 
 #map-menu #top-bar {
-    margin: 0;
-    margin-top: 50px;
-    clear: both;
-    display: block;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #EBEBEB;
+	margin: 0;
+	margin-top: 50px;
+	clear: both;
+	display: block;
+	padding-bottom: 20px;
+	border-bottom: 1px solid #EBEBEB;
 }
 
 #top-bar .arrow {
-    display: inline-block;
-    float: right;
+	display: inline-block;
+	float: right;
 }
 
 #top-bar .modes {
-    padding: 0px;
-    display: inline-block;
-    float: left;
+	padding: 0px;
+	display: inline-block;
+	float: left;
 }
 
 .modes .button {
-    display: inline-block;
-    background-color: #F5F5F5;
-    background-image: -moz-linear-gradient(center top , #F5F5F5, #F1F1F1);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 2px;
-    color: #444444;
-    font-size: 85%;
-    font-weight: bold;
-    height: 27px;
-    line-height: 27px;
-    min-width: 54px;
-    text-align: center;
-    transition: all 0.218s ease 0s;
+	display: inline-block;
+	background-color: #F5F5F5;
+	background-image: -moz-linear-gradient(center top , #F5F5F5, #F1F1F1);
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	border-radius: 2px;
+	color: #444444;
+	font-size: 85%;
+	font-weight: bold;
+	height: 27px;
+	line-height: 27px;
+	min-width: 54px;
+	text-align: center;
+	transition: all 0.218s ease 0s;
 }
 
-.modes .button:hover,
-.modes .button:active{
-    background-color: #EEEEEE;
-    background-image: -moz-linear-gradient(center top , #EEEEEE, #E0E0E0);
-    border: 1px solid #CCCCCC;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
-    color: #333333;
-    cursor: pointer;
+.modes .button:hover, .modes .button:active {
+	background-color: #EEEEEE;
+	background-image: -moz-linear-gradient(center top , #EEEEEE, #E0E0E0);
+	border: 1px solid #CCCCCC;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
+	color: #333333;
+	cursor: pointer;
 }
 
-.modes .button img{
-    vertical-align: center;
+.modes .button img {
+	vertical-align: center;
 }
 
 #map-menu #places {
-    clear: both;
-    padding: 20px 0;
-    margin: 0;
-    border-bottom: 1px solid #EBEBEB;
+	clear: both;
+	padding: 20px 0;
+	margin: 0;
+	border-bottom: 1px solid #EBEBEB;
 }
 
 #places .node {
-    padding: 8px 0px;
+	padding: 8px 0px;
 }
 
 .form-control {
-    width: 220px;
-    display: inline-block;
+	width: 220px;
+	display: inline-block;
 }
 
 .form-group {
-    margin-bottom: 0px;
+	margin-bottom: 0px;
 }
 
 #map-menu #button {
-    clear: both;
-    padding-top: 20px;
-    line-height: 30px;
+	clear: both;
+	padding-top: 20px;
+	line-height: 30px;
 }
 
 #map-menu #button button {
-    float: right;
+	float: right;
 }
 
 #map-menu #button span {
-    float: left;
+	float: left;
 }
 
 #map-menu header span {
-    float: left;
+	float: left;
 }
 
 span.link {
-    vertical-align: center;
-    color: #006699;
+	vertical-align: center;
+	color: #006699;
 }
 
 span.link:hover {
-    text-decoration: underline;
-    color: #009999;
-    cursor: pointer;
+	text-decoration: underline;
+	color: #009999;
+	cursor: pointer;
 }
 
 .header h5 {
-    display:inline-block;
-    margin-left: 20px;
+	display: inline-block;
+	margin-left: 20px;
 }
 
 #map-menu #routes {
-    border-bottom: 1px solid #EBEBEB;
+	border-bottom: 1px solid #EBEBEB;
 }
 
 #direction ol {
-    list-style: decimal;
+	list-style: decimal;
 }
 
-#direction ol, #routes ul{
-    padding: 0 40px;
+#direction ol, #routes ul {
+	padding: 0 40px;
 }
 
-#routes ul li, #direction ol li{
-    display: block;
-    padding: 10px;
-    border-bottom: 1px solid #EBEBEB;
-    border-top: 1px solid #EBEBEB;
+#routes ul li, #direction ol li {
+	display: block;
+	padding: 10px;
+	border-bottom: 1px solid #EBEBEB;
+	border-top: 1px solid #EBEBEB;
 }
 
-#routes ul li.active, #direction ul li.active, #routes ul li:hover, #direction ol li:hover{
-    background: none repeat scroll 0 0 #EBF2FC;
+#routes ul li.active, #direction ul li.active, #routes ul li:hover, #direction ol li:hover {
+	background: none repeat scroll 0 0 #EBF2FC;
 }
 
 #routes ul li .road {
-    float: left;
-    clear: both;
+	float: left;
+	clear: both;
 }
 
 #routes ul li .time-miles {
-    float: right;
-    font-size: 0.8em;
-    font-weight: bold;
+	float: right;
+	font-size: 0.8em;
+	font-weight: bold;
 }
 
 #direction ul li.point {
-    border-top: none;
+	border-top: none;
 }
 
 .point {
-    margin-left: 10px;
-    padding: 10px 0;
+	margin-left: 10px;
+	padding: 10px 0;
 }
 
 .point img {
-    float: left;
+	float: left;
 }
 
 .point .location {
-    margin-left: 10px;
-    font-weight: bold;
-    display:block;
-    float: left;
-    clear: right;
+	margin-left: 10px;
+	font-weight: bold;
+	display: block;
+	float: left;
+	clear: right;
 }
 
 .point .pin {
-    display:block;
-    clear: left;
-    margin-left: 10px;
-    float:left;
+	display: block;
+	clear: left;
+	margin-left: 10px;
+	float: left;
 }
 
 ol li {
-    font-size: 0.9em;
+	font-size: 0.9em;
 }
 
 .bold {
-    font-weight: bold;
+	font-weight: bold;
 }
 
-#nav_modes{
-    margin-left: 30px;
+#nav_modes {
+	margin-left: 30px;
 }
+
+#sliderBtnRight {
+	margin-top: 50px;
+}
+
+#time_dropdown {
+	float: right;
+}
+
+#blocks ul {
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+#blocks li {
+	display: inline-block;
+	vertical-align: top;
+	width: 280px;
+	background-color: #ff9933;
+	padding: 13px;
+	margin: 0px 0px 20px 19px;
+}
+
+#radiusSlider {
+	margin-top: 7px;
+	margin-left: 15px;
+	width: 100px;
+}
+@media (min-width: 1600px) {
+	#radiusSlider {
+		margin-top: 15px;
+		width: 100px;
+	}
+
+}
+
+ /*#slider{  
+        border-width: 1px;  
+        border-style: solid;  
+        border-color: #333 #333 #777 #333;  
+        border-radius: 25px;  
+          
+        height: 13px;  
+        background-color: #8e8d8d;  
+        background: url('images/slider_bg.png') repeat top left;  
+      box-shadow: inset 0 1px 5px 0px rgba(0, 0, 0, .5),   
+                     0 1px 0 0px rgba(250, 250, 250, .5);  
+       
+    }  */
+        .tooltip {  
+        position: absolute;  
+        display: block;  
+        top: 55px;  
+        width: 35px;  
+        height: 20px;  
+        color: #fff;  
+        text-align: center;  
+        font: 10pt Tahoma, Arial, sans-serif ;  
+        border-radius: 3px;  
+        border: 1px solid #333;  
+      box-shadow: 1px 1px 2px 0px rgba(0, 0, 0, .3);  
+        box-sizing: border-box;  
+        background: linear-gradient(top, rgba(69,72,77,0.5) 0%,rgba(0,0,0,0.5) 100%);  
+    }  
+   
