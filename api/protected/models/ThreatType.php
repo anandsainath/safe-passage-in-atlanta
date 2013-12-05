@@ -44,175 +44,145 @@ class ThreatType extends CActiveRecord {
         return $line_string;
     }
 
-    public function getSparklineData($routes) {
-        $outputs = array();
-        
+    public function getSparklineData($route) {
+        $line_string = $this->constructPolyline($route);
+        $sql_day = 'select day, count(*) as overall from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day order by overall desc';
+        $connection = Yii::app()->db;
+        $command = $connection->createCommand($sql_day);
+        $results_day = $command->queryAll();
+        foreach ($results_day as $result) {
+            $overall[$result['day']] = $result['overall'] / $results_day[0]['overall'];
+        }
+        $sql_heatmap = 'select day, shift, violentyn, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day, shift, violentyn '
+                . 'UNION '
+                . 'select day, shift, NULL, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day, shift '
+                . 'UNION '
+                . 'select day, NULL, NULL, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day order by count desc, shift desc, violentyn desc';
+        $connection = Yii::app()->db;
+        $command = $connection->createCommand($sql_heatmap);
+        $results_heatmap = $command->queryAll();
+        $overall_max = -1;
+        $agg_max = -1;
+        $output = array();
+        //return CJSON::encode($results_heatmap);
+        foreach ($results_heatmap as $result) {
+            if (is_null($result['shift']) && is_null($result['violentyn'])) {
+                if ($overall_max == -1) {
+                    $overall_max = $result['count'];
+                }
+                $output[] = array(
+                    'day' => $result['day'],
+                    'overall' => $result['count'] / $overall_max,
+                    'summary' => array()
+                );
+            } elseif (is_null($result['violentyn'])) {
+                if ($agg_max == -1) {
+                    $agg_max = $result['count'];
+                }
+                foreach ($output as $key => $dayIndex) {
+                    if ($dayIndex['day'] == $result['day']) {
+                        $summary = array(
+                            'time' => $result['shift'],
+                            'agg' => $result['count'] / $agg_max,
+                            'day' => $result['day']
+                        );
+                        $output[$key]['summary'][] = $summary;
+                    }
+                }
+            } else {
+                foreach ($output as $key1 => $dayIndex) {
+                    if ($dayIndex['day'] == $result['day']) {
+                        foreach ($dayIndex['summary'] as $key2 => $summary) {
+                            if ($summary['time'] == $result['shift']) {
+                                $output[$key1]['summary'][$key2]['violent'] = ($result['violentyn'] == 1) ? 1 : 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         function daySort($a, $b) {
             $weekdays = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
             return array_search($a['day'], $weekdays) - array_search($b['day'], $weekdays);
         }
-        
+
+        usort($output, "daySort");
+
         function timeSort($a, $b) {
             $shifts = array("Morning", "Afternoon", "Evening", "Night");
             return array_search($a['time'], $shifts) - array_search($b['time'], $shifts);
         }
-        
-//        $sql = array();
-//        foreach ($routes as $route) {
-//            $line_string = $this->constructPolyline($route);
-//            $sql[] = 'select day, shift, microshift, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day,shift, microshift';
-//        }
-//        $sql_all = implode(' UNION ', $sql);
-//        $sql_all .= ' order by count desc limit 1';
-//        $connection = Yii::app()->db;
-//        $command = $connection->createCommand($sql_all);
-//        $max_count = $command->queryAll();
-        $max_count = 0;
-        foreach($routes as $route) {
-            $line_string = $this->constructPolyline($route);
-            $sql_day = 'select day, count(*) as overall from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day order by overall desc';
-            $connection = Yii::app()->db;
-            $command = $connection->createCommand($sql_day);
-            $results_day = $command->queryAll();
-            foreach ($results_day as $result) {
-                $overall[$result['day']] = $result['overall'] / $results_day[0]['overall'];
-            }
-            $sql_heatmap = 'select day, shift, violentyn, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day, shift, violentyn '
-                    . 'UNION '
-                    . 'select day, shift, NULL, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day, shift '
-                    . 'UNION '
-                    . 'select day, NULL, NULL, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day order by count desc, shift desc, violentyn desc';
-            $connection = Yii::app()->db;
-            $command = $connection->createCommand($sql_heatmap);
-            $results_heatmap = $command->queryAll();
-            $overall_max = -1;
-            $agg_max = -1;
-            $output = array();
-            //return CJSON::encode($results_heatmap);
-            foreach ($results_heatmap as $result) {
-                if (is_null($result['shift']) && is_null($result['violentyn'])) {
-                    if ($overall_max == -1) {
-                        $overall_max = $result['count'];
-                    }
-                    $output[] = array(
-                        'day' => $result['day'],
-                        'overall' => $result['count'] / $overall_max,
-                        'summary' => array()
-                    );
-                } elseif (is_null($result['violentyn'])) {
-                    if ($agg_max == -1) {
-                        $agg_max = $result['count'];
-                    }
-                    foreach ($output as $key => $dayIndex) {
-                        if ($dayIndex['day'] == $result['day']) {
-                            $summary = array(
-                                'time' => $result['shift'],
-                                'agg' => $result['count'] / $agg_max,
-                                'day' => $result['day']
-                            );
-                            $output[$key]['summary'][] = $summary;
-                        }
-                    }
-                } else {
-                    foreach ($output as $key1 => $dayIndex) {
-                        if ($dayIndex['day'] == $result['day']) {
-                            foreach ($dayIndex['summary'] as $key2 => $summary) {
-                                if ($summary['time'] == $result['shift']) {
-                                    $output[$key1]['summary'][$key2]['violent'] = ($result['violentyn'] == 1) ? 1 : 0;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
 
-            usort($output, "daySort");
+        foreach ($output as $dayID => $day) {
+            usort($output[$dayID]['summary'], "timeSort");
+        }
+        $sql_sparklines = 'select day, shift, microshift, violentyn, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day, shift, microshift, violentyn order by shift,microshift';
+        $connection = Yii::app()->db;
+        $command = $connection->createCommand($sql_sparklines);
+        $results_sparklines = $command->queryAll();
 
-            foreach ($output as $dayID => $day) {
-                usort($output[$dayID]['summary'], "timeSort");
-            }
-            $sql_sparklines = 'select day, shift, microshift, violentyn, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day, shift, microshift, violentyn order by shift,microshift';
-            $connection = Yii::app()->db;
-            $command = $connection->createCommand($sql_sparklines);
-            $results_sparklines = $command->queryAll();
+        foreach ($results_sparklines as $row) {
+            $sparkline[$row['day']][$row['shift']][$row['microshift']][$row['violentyn']] = $row['count'];
+        }
 
-            foreach ($results_sparklines as $row) {
-                $sparkline[$row['day']][$row['shift']][$row['microshift']][$row['violentyn']] = $row['count'];
-            }
+        foreach ($output as $dayID => $day) {
+            $shifts = array("Morning", "Afternoon", "Evening", "Night");
+            foreach ($shifts as $shiftID => $shift) {
+                $micro_violent = array();
+                $micro_nonviolent = array();
+                $micro_total = array();
+                $output[$dayID]['summary'][$shiftID]['row_index'] = $dayID;
+                $output[$dayID]['summary'][$shiftID]['col_index'] = $shiftID;
 
-            foreach ($output as $dayID => $day) {
-                $shifts = array("Morning", "Afternoon", "Evening", "Night");
-                foreach ($shifts as $shiftID => $shift) {
-                    $micro_violent = array();
-                    $micro_nonviolent = array();
-                    $micro_total = array();
-                    $output[$dayID]['summary'][$shiftID]['row_index'] = $dayID;
-                    $output[$dayID]['summary'][$shiftID]['col_index'] = $shiftID;
-
-                    for ($i = 0; $i < 6; $i++) {
-                        if (array_key_exists($i, $sparkline[$day['day']][$shift])) {
-                            if (array_key_exists('N', $sparkline[$day['day']][$shift][$i])) {
-                                $micro_nonviolent[] = $sparkline[$day['day']][$shift][$i]['N'];///$max_count[0]['count'];
-                            } else {
-                                $micro_nonviolent[] = 0;
-                            }
-                            if (array_key_exists('Y', $sparkline[$day['day']][$shift][$i])) {
-                                $micro_violent[] = $sparkline[$day['day']][$shift][$i]['Y'];///$max_count[0]['count'];
-                            } else {
-                                $micro_violent[] = 0;
-                            }
+                for ($i = 0; $i < 6; $i++) {
+                    if (array_key_exists($i, $sparkline[$day['day']][$shift])) {
+                        if (array_key_exists('N', $sparkline[$day['day']][$shift][$i])) {
+                            $micro_nonviolent[] = $sparkline[$day['day']][$shift][$i]['N'];
                         } else {
-                            $micro_violent[] = $micro_nonviolent[] = 0;
+                            $micro_nonviolent[] = 0;
                         }
-                        $micro_total = array_map(function () {
-                            return array_sum(func_get_args());
-                        }, $micro_violent, $micro_nonviolent);
-                        $max_count = (max($micro_total) > $max_count)? max($micro_total) : $max_count;
-                        
+                        if (array_key_exists('Y', $sparkline[$day['day']][$shift][$i])) {
+                            $micro_violent[] = $sparkline[$day['day']][$shift][$i]['Y'];
+                        } else {
+                            $micro_violent[] = 0;
+                        }
+                    } else {
+                        $micro_violent[] = $micro_nonviolent[] = 0;
                     }
-                    $output[$dayID]['detailed'][] = array(
-                        'day' => $day['day'],
-                        'time' => $shift,
-                        'total' => $micro_total,
-                        'violent' => $micro_violent,
-                        'row_index' => $dayID,
-                        'col_index' => $shiftID
-                    );
-                    $output[$dayID]['index'] = $dayID;
+                    $micro_total = array_map(function () {
+                        return array_sum(func_get_args());
+                    }, $micro_violent, $micro_nonviolent);
                 }
-            }
-            $outputs[] = $output;
-        }
-        
-        foreach ($outputs as $outputID => $output) {
-            foreach($output as $dayID => $day) {
-                foreach($day['detailed'] as $shiftID => $shift) {
-                    foreach ($shift['total'] as $microshiftID => $microshift) {
-                        //return $max_count;
-                        $outputs[$outputID][$dayID]['detailed'][$shiftID]['total'][$microshiftID] = $microshift / $max_count;
-                    }
-                }
+                $output[$dayID]['detailed'][] = array(
+                    'day' => $day['day'],
+                    'time' => $shift,
+                    'total' => $micro_total,
+                    'violent' => $micro_violent,
+                    'row_index' => $dayID,
+                    'col_index' => $shiftID
+                );
+                $output[$dayID]['index'] = $dayID;
             }
         }
-        return $outputs;
-    }
-    
-    public function getStackGraph($route) {
-        $line_string = $this->constructPolyline($route);
-        $sql = "insert into line values ($line_string) ";
+
+        return CJSON::encode($output);
     }
 
-    public function constructWaypointTable($routes) {
+    public function constructTempTable($routes) {
         $connection = Yii::app()->db;
         $command = $connection->createCommand();
-        $command->truncateTable('waypoints2');
+        $command->truncateTable('temp_waypoints');
         $shiftType = array('Morning', 'Afternoon', 'Evening', 'Night');
         $dayType = array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday');
-        $sql = 'insert into waypoints2 (point,majoryn,crimetype) values ';
+        $sql = 'insert into waypoints2 (point,majoryn,crimetype,day,shift) values ';
         foreach ($routes as $route) {
             foreach ($route['points'] as $pointIndex => $point) {
                 for ($threatType = 1; $threatType < 8; $threatType++) {
-                    $sql .= "(ST_SetSRID(ST_MakePoint(" . $point['latitude'] . "," . $point['longitude'] . "),4326)," . $point['major'] . "," . $threatType . "),";
+                    foreach ($dayType as $day) {
+                        foreach ($shiftType as $shift)
+                            $sql .= "(ST_SetSRID(ST_MakePoint(" . $point['latitude'] . "," . $point['longitude'] . "),4326)," . $point['major'] . "," . $threatType . ",'" . $day . "','" . $shift . "'),";
+                    }
                 }
             }
         }
@@ -221,16 +191,16 @@ class ThreatType extends CActiveRecord {
         $connection = Yii::app()->db;
         $command = $connection->createCommand($sql);
         $results = $command->queryAll();
-//        $sql = 'WITH route_crime as ('
-//                . 'select * '
-//                . 'from "tbl_ThreatData" '
-//                . 'where ST_Distance_Sphere(location, ' . $line_string . ') < 100'
-//                . ')'
-//                . 'select location, count(route_crime.point) '
-//                . 'from waypoints2,route_crime '
-//                . 'where ST_DWithin(location,point,0.001)) '
-//                . 'group by location';
-//        return $sql;
+        $sql = 'WITH route_crime as ('
+                . 'select * '
+                . 'from "tbl_ThreatData" '
+                . 'where ST_Distance_Sphere(location, ' . $line_string . ') < 100'
+                . ')'
+                . 'select location, count(route_crime.point) '
+                . 'from waypoints2,route_crime '
+                . 'where ST_DWithin(location,point,0.001)) '
+                . 'group by location';
+        return $sql;
 //                $sql="delete from temp_waypoints where point in (select point from waypoints)";
 //                $connection=Yii::app()->db;
 //                $command=$connection->createCommand($sql);
