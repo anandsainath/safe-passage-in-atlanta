@@ -17,6 +17,7 @@
             directions: undefined,
             crimeStats: undefined,
             svgSelector: undefined,
+            routeNum: 0,
             dimension: {
                 chartWidth: 1200,
                 chartHeight: 225,
@@ -56,6 +57,13 @@
             if (opts.debug) {
                 console.log("Init called in stackChart.js");
             }
+        },
+        getSelectedRouteID: function() {
+            if(opts.routeNum === undefined){
+                opts.routeNum = 0;
+            }
+            console.log(opts.routeNum, "route num");
+            return opts.routeNum;
         },
         updateChart: function(crimeStatsData) {
             opts.crimeStats = crimeStatsData;
@@ -99,6 +107,7 @@
         },
         showStackedChart: function(routeNum) {
             opts.routeNum = routeNum;
+            console.log(opts.directions.routes, routeNum);
             var routeLeg = opts.directions.routes[routeNum].legs[0];
             var totalDistance = routeLeg.distance.value;
             var xScale = d3.scale.linear().domain([0, totalDistance]).range([opts.dimension.xPadding, opts.dimension.chartWidth - opts.dimension.xPadding]);

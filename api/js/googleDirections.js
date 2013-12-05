@@ -101,6 +101,9 @@
         },
         getStackAreaData: function() {
             return opts.jsonData.area;
+        },
+        setData: function(data) {
+            opts.jsonData = data;
         }
         /*** /GLOBAL Functions ***/
     });

@@ -1,5 +1,5 @@
 
-<?php //the theme file for the entire site.                                                  ?>
+<?php //the theme file for the entire site.                                                           ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -26,7 +26,9 @@
 
         <script type="text/javascript">
             var transitMode = "drive",
-                    nodeLinkMode = 'actual';
+                    nodeLinkMode = 'actual',
+                    thresholdValue = 0.001,
+                    startString = undefined;
 
             $(function() {
                 $.googleDirections({
@@ -56,7 +58,23 @@
                     },
                     change: function(event, ui) {
                         $("#threshold").html("Threshold : " + ui.value);
-                        console.log((ui.value) / 1000);
+                        thresholdValue = ((ui.value) / 100000);
+
+                        var args = {};
+                        if (startString) {
+                            args.start_date = startString;
+                        }
+                        args.json_string = JSON.stringify($.googleDirections.getRoutes());
+                        args.threshold = thresholdValue;
+
+                        $('.modal').show();
+                        $.post('http://dev.infovis.com/get-data', args, function(data) {
+                            $('#nodeLink > svg').children().remove();
+                            $.googleDirections.setData($.parseJSON(data));
+                            showNodeLink(nodeLinkMode);
+                            loadPage2($.stackChart.getSelectedRouteID())
+                            $('.modal').hide();
+                        });
                     }
                 });
 
@@ -194,6 +212,7 @@
             }
 
             function googleMapsInitialized() {
+                drawMap('33.78302,-84.394401');
                 //function called once the google maps has been initialized..
                 $('.js-input').each(function(index, value) {
                     new google.maps.places.Autocomplete($(this)[0]);
@@ -217,28 +236,34 @@
             }
 
             function getOption(sel) {
-
-                if (sel.options[sel.selectedIndex].value == "Last month") {
-                    var start = new Date();
-                    var end = new Date();
-                    start.setMonth(start.getMonth() - 1);
-                    var startString = dateToString(start);
-                    var endString = dateToString(end);
-
-                } else if (sel.options[sel.selectedIndex].value == "Last year") {
+                if (sel.options[sel.selectedIndex].value == "Last year") {
                     var start = new Date();
                     var end = new Date();
                     start.setMonth(start.getMonth() - 12);
-                    var startString = dateToString(start);
-                    var endString = dateToString(end);
+                    startString = dateToString(start);
 
                 } else if (sel.options[sel.selectedIndex].value == "Last 2 years") {
                     var start = new Date();
                     var end = new Date();
                     start.setMonth(start.getMonth() - 24);
-                    var startString = dateToString(start);
-                    var endString = dateToString(end);
+                    startString = dateToString(start);
                 }
+
+                var args = {};
+                if (startString) {
+                    args.start_date = startString;
+                }
+                args.json_string = JSON.stringify($.googleDirections.getRoutes());
+                args.threshold = thresholdValue;
+
+                $('.modal').show();
+                $.post('http://dev.infovis.com/get-data', args, function(data) {
+                    $('#nodeLink > svg').children().remove();
+                    $.googleDirections.setData($.parseJSON(data));
+                    showNodeLink(nodeLinkMode);
+                    loadPage2($.stackChart.getSelectedRouteID())
+                    $('.modal').hide();
+                });
             }
 
             function doSearch() {
@@ -253,8 +278,124 @@
                         stopover: false
                     });
                 });
-
+                drawMap('33.78302,-84.394401');
+                requestDirections($('.js-input:first').val(), $('.js-input:last').val(), wayPoints, 0, true, transitMode);
                 $.googleDirections.getDirections($('.js-input:first').val(), $('.js-input:last').val(), wayPoints, transitMode);
+            }
+
+            var directionDisplay;
+            var directionsRenderer;
+            var directionsService;
+            var map;
+            var directionsRenderer;
+
+            function drawMap(midpoint) {
+                directionsService = new google.maps.DirectionsService();
+                var mid = midpoint.split(",");
+                var start = new google.maps.LatLng(mid[0], mid[1]);
+                var myOptions = {
+                    zoom: 7,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    center: start,
+                    mapTypeControl: false
+                }
+                map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+            }
+
+            function getRendererOptions(main_route)
+            {
+                if (main_route)
+                {
+                    var _colour = '#00458E';
+                    var _strokeWeight = 2;
+                    var _strokeOpacity = 1.0;
+                    var _suppressMarkers = false;
+                }
+                else
+                {
+                    var _colour = '#ED1C24';
+                    var _strokeWeight = 2;
+                    var _strokeOpacity = 1;
+                    var _suppressMarkers = false;
+                }
+
+                var polylineOptions = {strokeColor: _colour, strokeWeight: _strokeWeight, strokeOpacity: _strokeOpacity};
+
+                var rendererOptions = {draggable: false, suppressMarkers: _suppressMarkers, polylineOptions: polylineOptions};
+
+                return rendererOptions;
+            }
+
+            function renderDirections(result, rendererOptions, routeToDisplay)
+            {
+
+
+                var _colour = colors(routeToDisplay);
+                var _strokeWeight = 2;
+                var _strokeOpacity = 1.0;
+                var _suppressMarkers = false;
+
+                // if (routeToDisplay == 0) _colour = "#FF0000";
+                // create new renderer object
+                directionsRenderer = new google.maps.DirectionsRenderer({
+                    draggable: false,
+                    suppressMarkers: _suppressMarkers,
+                    polylineOptions: {
+                        strokeColor: _colour,
+                        strokeWeight: _strokeWeight,
+                        strokeOpacity: _strokeOpacity
+                    }
+                });
+                directionsRenderer.setMap(map);
+
+                directionsRenderer.setDirections(result);
+                directionsRenderer.setRouteIndex(routeToDisplay);
+            }
+
+            function requestDirections(start, end, wayPoints, routeToDisplay, main_route) {
+                console.log('inside request directions ' + start);
+                var travelMode = google.maps.TravelMode.DRIVING;
+                switch (transitMode) {
+                    case "private":
+                        travelMode = google.maps.TravelMode.DRIVING;
+                        break;
+                    case "public":
+                        travelMode = google.maps.TravelMode.TRANSIT;
+                        break;
+                    case "walk":
+                        travelMode = google.maps.TravelMode.WALKING;
+                        break;
+                    case "cycle":
+                        travelMode = google.maps.TravelMode.BICYCLING;
+                        break;
+                }
+                var request = {
+                    origin: start,
+                    destination: end,
+                    travelMode: travelMode,
+                    provideRouteAlternatives: true,
+                    waypoints: wayPoints
+                };
+
+
+                directionsService.route(request, function(result, status) {
+                    if (status == google.maps.DirectionsStatus.OK)
+                    {
+                        if (main_route)
+                        {
+                            var rendererOptions = getRendererOptions(true);
+                            for (var i = 0; i < result.routes.length; i++)
+                            {
+                                renderDirections(result, rendererOptions, i);
+                            }
+                        }
+                        else
+                        {
+                            var rendererOptions = getRendererOptions(false);
+                            renderDirections(result, rendererOptions, routeToDisplay);
+                        }
+                    }
+                });
             }
         </script>
     </head>
@@ -273,7 +414,6 @@
                 <div id = "timeSelector" class="nav pull-right">
                     <select class="form-control" onchange="getOption(this)">
                         <option>All Time</option>
-                        <option>Last month</option>
                         <option>Last year</option>
                         <option>Last 2 years</option>
                     </select>
@@ -333,7 +473,7 @@
 
                 <ul class="list-unstyled" id='suggestedRoutesList'></ul>
             </div>
-
+            <div id="map_canvas"  style="width: 300px; height: 300px"></div>
             <div id="direction" class="row hidden">
                 <div class="header">
                     <h5> Driving Direction to Atlanta Airport </h5>

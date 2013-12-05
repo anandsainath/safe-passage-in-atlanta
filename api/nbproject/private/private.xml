@@ -4,13 +4,12 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/protected/controllers/ThreatController.php</file>
-            <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/protected/views/home/stacked_area_chart.php</file>
-            <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/protected/controllers/HomeController.php</file>
-            <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/protected/views/home/temporal.php</file>
-            <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/js/temporalOverview.js</file>
+            <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/js/nodeLink.js</file>
+            <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/js/stackChart.js</file>
+            <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/protected/config/main.php</file>
+            <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/protected/views/home/index.php</file>
             <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/js/googleDirections.js</file>
-            <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/js/temporalDetailed.js</file>
-            <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/protected/models/ThreatType.php</file>
+            <file>file:/Library/WebServer/Documents/infovis/safe-passage-in-atlanta/api/protected/views/layouts/infovis.php</file>
         </group>
     </open-files>
 </project-private>

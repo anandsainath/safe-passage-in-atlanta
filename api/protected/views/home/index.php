@@ -31,6 +31,9 @@ $cs->registerScriptFile($base_url . '/js/temporalDetailed.js', CClientScript::PO
             var from = wayPoints.splice(0, 1)[0],
                     to = wayPoints.pop();
             $.googleDirections.getDirections(from, to, wayPoints, data.mode);
+            
+            drawMap('33.78302,-84.394401');
+            requestDirections(from, to, wayPoints, 0, true, data.mode);
         });
     });
 </script>
@@ -92,7 +95,6 @@ $cs->registerScriptFile($base_url . '/js/temporalDetailed.js', CClientScript::PO
         <li data-route='{"route":["1482 Monroe Dr NE, Atlanta, GA 30324", "Eastside Trail, Atlanta, GA 30312"], "mode": "walk"}'>Jogger's Route</li>
         <li data-route='{"route":["404 Dollar Mill Rd SW, Atlanta, GA 30331", "Adamsville Elementary School, 286 Wilson Mill Rd SW, Atlanta, GA 30331"], "mode": "walk"}'>School Route 1</li>
         <li data-route='{"route":["Ontario Park, Atlanta, GA 30310", "2257 Bollingbrook Dr SW, Atlanta, GA 30311"], "mode": "walk"}'>School Route 2</li>
-        <li data-route='{"route":["1130 Juniper St NE, Atlanta, GA 30309", "239 Bobby Dodd Way NW, Atlanta, GA 30313"], "mode": "walk"}'>Bar Trip 1</li>
         <li data-route='{"route":["832 Neal St NW, Atlanta, GA 30318", "85 Maple St NW, Atlanta, GA 30318"], "mode": "walk"}'>Marta Commuter</li>
     </ul>
 </div>
