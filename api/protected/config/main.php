@@ -41,6 +41,7 @@ return array(
                 'get-data' => 'Threat/GetData',
                 'temporal-view' => 'Home/TemporalView',
                 'temporal-view-data' => 'Threat/TemporalGraph',
+                'update-stack-area' => 'Threat/UpdateStackArea',
                 'gii/<controller:\w+>' => 'gii/<controller>',
                 'gii/<controller:\w+>/<action:\w+>' => 'gii/<controller>/<action>', '<controller:\w+>/<id:\d+>' => '<controller>/view',
                 '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',

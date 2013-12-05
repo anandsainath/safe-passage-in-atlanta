@@ -362,7 +362,7 @@ function drawCircle(svg, index, datum, route, falseCircle) {
             .attr("route", JSON.stringify([route]));
 }
 
-function getNodeRepresentation2(nodeLink) {
+function getNodeRepresentation(nodeLink) {
     var nodes = [],
             links = [];
     var prevRouteID = -1;

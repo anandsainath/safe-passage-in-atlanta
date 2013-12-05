@@ -1,5 +1,5 @@
 
-<?php //the theme file for the entire site.                                  ?>
+<?php //the theme file for the entire site.                                                  ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -51,8 +51,12 @@
                     min: 100,
                     max: 500,
                     step: 100,
+                    create: function(event, ui) {
+                        $("#threshold").html("Threshold : 100");
+                    },
                     change: function(event, ui) {
-                        console.log(ui.value);
+                        $("#threshold").html("Threshold : " + ui.value);
+                        console.log((ui.value) / 1000);
                     }
                 });
 
@@ -69,14 +73,13 @@
                         easing: 'swing',
                         queue: false,
                         complete: function() {
-                            console.log("Transition is complete!");
-                            $("#open-tab").show();
+                            $("#open-tab").show("fast");
                         }
                     });
                 });
 
                 $('#sliderBtnRight').click(function() {
-                    $("#open-tab").hide();
+                    $("#open-tab").hide("fast");
                     $('#map-menu').animate({
                         left: '-0%'
                     }, {
@@ -156,7 +159,8 @@
 
                 $.stackChart({
                     svgSelector: '#stackedAreaChart > svg',
-                    directions: $.googleDirections.getRoutes()
+                    directions: $.googleDirections.getRoutes(),
+                    crimeStats: $.googleDirections.getStackAreaData()
                 });
                 $.stackChart.showStackedChart(routeID);
 
@@ -196,6 +200,47 @@
                 });
             }
 
+            function dateToString(today) {
+                var dd = today.getDate();
+                var mm = today.getMonth() + 1;
+
+                var yyyy = today.getFullYear();
+
+                if (dd < 10) {
+                    dd = '0' + dd
+                }
+                if (mm < 10) {
+                    mm = '0' + mm
+                }
+                var result = mm + '/' + dd + '/' + yyyy;
+                return result;
+            }
+
+            function getOption(sel) {
+
+                if (sel.options[sel.selectedIndex].value == "Last month") {
+                    var start = new Date();
+                    var end = new Date();
+                    start.setMonth(start.getMonth() - 1);
+                    var startString = dateToString(start);
+                    var endString = dateToString(end);
+
+                } else if (sel.options[sel.selectedIndex].value == "Last year") {
+                    var start = new Date();
+                    var end = new Date();
+                    start.setMonth(start.getMonth() - 12);
+                    var startString = dateToString(start);
+                    var endString = dateToString(end);
+
+                } else if (sel.options[sel.selectedIndex].value == "Last 2 years") {
+                    var start = new Date();
+                    var end = new Date();
+                    start.setMonth(start.getMonth() - 24);
+                    var startString = dateToString(start);
+                    var endString = dateToString(end);
+                }
+            }
+
             function doSearch() {
                 $('.modal').show();
                 if ($('.js-input').length === 2 && ($('.js-input:first').val() === "" || $('.js-input:last').val() === "")) {
@@ -224,17 +269,16 @@
                 <div id = "radiusSlider" class="nav pull-right">
                     <div id="slider"></div>
                 </div>
-
+                <p class="navbar-text navbar-right" id="threshold">Threshold: </p>
                 <div id = "timeSelector" class="nav pull-right">
-
-                    <select class="form-control">
-                        <option>Last week</option>
+                    <select class="form-control" onchange="getOption(this)">
+                        <option>All Time</option>
                         <option>Last month</option>
                         <option>Last year</option>
                         <option>Last 2 years</option>
                     </select>
-
                 </div>
+                <p class="navbar-text navbar-right">Time period: </p>
 
             </div>
         </div>
@@ -328,7 +372,7 @@
         <nav id="open-tab">
 
             <div class="arrow" id="sliderBtnRight">
-                <img src="images/arrow-right.png"/>
+                <span class="glyphicon glyphicon-th-large"></span>
             </div>
         </nav>
     </body>

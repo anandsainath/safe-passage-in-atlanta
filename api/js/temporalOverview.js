@@ -86,6 +86,7 @@
                     methods.processItemClicked(d3.select(d3.selectAll('.circleG')[0][itemCount]), isSelected, args, false);
                     break;
             }
+            console.log("processing Event");
         }
         /*** /GLOBAL Functions ***/
     });
@@ -93,6 +94,20 @@
 
     /** Helper functions in the scope of the plugin **/
     var methods = {
+        updateStackArea: function(day, time) {
+            console.log("Inside update area");
+            var args = {};
+            if (day) {
+                args.day = day;
+            }
+            if (time) {
+                args.time = time;
+            }
+            args.json_string = JSON.stringify($.googleDirections.getRoutes());
+            $.post('http://dev.infovis.com/update-stack-area', args, function(data) {
+                $.stackChart.updateChart($.parseJSON(data));
+            });
+        },
         removeAllSelected: function() {
             opts.boundingRect.selectAll('.selected-column').remove();
             opts.boundingRect.selectAll('.selected-row').remove();
@@ -118,12 +133,14 @@
                             .ease('elastic')
                             .style("opacity", opts.opacity.shown);
                     _this.classed('js-clicked', true);
+                    methods.updateStackArea(undefined, $('.js-clicked').text());
                     opts.lockInteraction = true;
                 }
             } else {
                 _this.classed('js-clicked', false);
                 opts.lockInteraction = false;
                 opts.boundingRect.select('.selected-column').remove();
+                methods.updateStackArea(undefined, undefined);
             }
 
             if (isSource) {
@@ -149,12 +166,14 @@
                             .ease('elastic')
                             .style("opacity", opts.opacity.shown);
                     _this.classed('js-clicked', true);
+                    methods.updateStackArea($('.js-clicked').text(), undefined);
                     opts.lockInteraction = true;
                 }
             } else {
                 _this.classed('js-clicked', false);
                 opts.lockInteraction = false;
                 opts.boundingRect.select('.selected-row').remove();
+                methods.updateStackArea(undefined, undefined);
             }
 
             if (isSource) {
@@ -178,12 +197,14 @@
                             .ease('elastic')
                             .style("opacity", opts.opacity.shown);
                     _this.classed('js-clicked', true);
+                    methods.updateStackArea(datum.day, datum.time);
                     opts.lockInteraction = true;
                 }
             } else {
                 _this.classed('js-clicked', false);
                 opts.lockInteraction = false;
                 opts.boundingRect.select('.selected-item').remove();
+                methods.updateStackArea(undefined, undefined);
             }
 
             if (isSource) {

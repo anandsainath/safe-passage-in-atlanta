@@ -44,6 +44,95 @@ class ThreatType extends CActiveRecord {
         return $line_string;
     }
 
+    public function getStreamGraphData($routes, $date, $threshold, $day, $time) {
+        if (!isset($threshold)) {
+            $threshold = 0.001;
+        }
+        if (isset($date)) {
+            $date_query = " and occur_timestamp >= to_timestamp('" . $date . "','MM/DD/YYYY') ";
+        } else {
+            $date_query = '';
+        }
+        if (!is_null($day)) {
+            $day_query = " and day = '".$day."' ";
+        } else {
+            $day_query = '';
+        }
+        if (!is_null($time)) {
+            $time_query = " and shift = '".$time."' ";
+        } else {
+            $time_query = '';
+        }
+        $multi_string = $this->constructMultiLineString($routes);
+        $this->constructStreamGraphTable($routes);
+        $sql = 'WITH route_crime as ('
+                . 'select * '
+                . 'from "tbl_ThreatData" '
+                . 'where ST_DWithin(location, ' . $multi_string . ', ' . $threshold . ')'
+                . ') '
+                . 'select st_X(point) lat,st_Y(point) lng,routeid,crimetype,pointid,count(route_crime.location) count '
+                . 'from temp_streamgraph, route_crime '
+                . 'where ST_DWithin(location,point,' . $threshold . ') and '
+                . 'crimetype = id_threattype '
+                . $date_query
+                . $day_query
+                . $time_query
+                . 'group by point, routeid, crimetype, pointid '
+                . 'order by routeid, pointid';
+        $connection = Yii::app()->db;
+        $command = $connection->createCommand($sql);
+        $results = $command->queryAll();
+        $threatType = array('1' => 'Burglary', '2' => 'Larceny', '3' => 'Auto Theft', '4' => 'Robbery', '5' => 'Agg Assault', '6' => 'Rape', '7' => 'Homicide', '8' => 'Fatal Accident');
+        $streamline = array();
+        foreach ($results as $result) {
+            $streamline[$result['routeid']][$result['crimetype']][$result['pointid']] = $result['count'];
+        }
+        $output = array();
+        foreach ($streamline as $routeID => $route) {
+            $typeArray = array();
+            for ($i = 1; $i < 9; $i++) {
+                //$typeArray[] = array('key' => $threatType[$i]);
+                if (array_key_exists($i, $route)) {
+                    $pointArray = array();
+                    foreach ($routes[$routeID]['points'] as $pointID => $points) {
+                        if (array_key_exists($pointID, $route[$i])) {
+                            $pointArray[] = $route[$i][$pointID];
+                        } else {
+                            $pointArray[] = 0;
+                        }
+                    }
+                } else {
+                    $pointArray = array();
+                    foreach ($routes[$routeID]['points'] as $pointID => $points) {
+                        $pointArray[] = 0;
+                    }
+                }
+                $typeArray[] = array('key' => $threatType[$i], 'value' => $pointArray);
+            }
+            $output[] = $typeArray;
+        }
+        return $output;
+    }
+
+    public function constructStreamGraphTable($routes) {
+        $connection = Yii::app()->db;
+        $command = $connection->createCommand();
+        $command->truncateTable('temp_streamgraph');
+        $sql = 'insert into temp_streamgraph (point,majoryn,routeid,pointid,crimetype) values ';
+        foreach ($routes as $routeID => $route) {
+            foreach ($route['points'] as $pointID => $point) {
+                for ($i = 1; $i < 9; $i++) {
+                    $sql .= "(ST_SetSRID(ST_MakePoint(" . $point['latitude'] . "," . $point['longitude'] . "),4326)," . $point['major'] . "," . $routeID . "," . $pointID . "," . $i . "),";
+                }
+            }
+        }
+        $line_string = $this->constructPolyline($routes[0]);
+        $sql = rtrim($sql, ',');
+        $connection = Yii::app()->db;
+        $command = $connection->createCommand($sql);
+        $results = $command->queryAll();
+    }
+
     public function constructMultiLineString($routes) {
         $multi_string = "st_setsrid(st_geomfromtext('MULTILINESTRING(";
         foreach ($routes as $route) {
@@ -102,9 +191,16 @@ class ThreatType extends CActiveRecord {
     }
 
     //dei poda
-    public function getSparklineData($routes) {
+    public function getSparklineData($routes, $date, $threshold) {
         $outputs = array();
-
+        if (!isset($threshold)) {
+            $threshold = 0.001;
+        }
+        if (isset($date)) {
+            $date_query = "and occur_timestamp >= to_timestamp('" . $date . "','MM/DD/YYYY') ";
+        } else {
+            $date_query = '';
+        }
         function daySort($a, $b) {
             $weekdays = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
             return array_search($a['day'], $weekdays) - array_search($b['day'], $weekdays);
@@ -135,11 +231,11 @@ class ThreatType extends CActiveRecord {
             foreach ($results_day as $result) {
                 $overall[$result['day']] = $result['overall'] / $results_day[0]['overall'];
             }
-            $sql_heatmap = 'select day, shift, violentyn, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day, shift, violentyn '
+            $sql_heatmap = 'select day, shift, violentyn, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ','.$threshold.') '.$date_query. ' group by day, shift, violentyn '
                     . 'UNION '
-                    . 'select day, shift, NULL, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day, shift '
+                    . 'select day, shift, NULL, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ','.$threshold.') '.$date_query. ' group by day, shift '
                     . 'UNION '
-                    . 'select day, NULL, NULL, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day order by count desc, shift desc, violentyn desc';
+                    . 'select day, NULL, NULL, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ','.$threshold.') '.$date_query. ' group by day order by count desc, shift desc, violentyn desc';
             $connection = Yii::app()->db;
             $command = $connection->createCommand($sql_heatmap);
             $results_heatmap = $command->queryAll();
@@ -176,7 +272,9 @@ class ThreatType extends CActiveRecord {
                         if ($dayIndex['day'] == $result['day']) {
                             foreach ($dayIndex['summary'] as $key2 => $summary) {
                                 if ($summary['time'] == $result['shift']) {
-                                    $output[$key1]['summary'][$key2]['violent'] = ($result['violentyn'] == 'Y') ? 1 : 0;
+                                    if ($result['violentyn'] == 'Y' && $result['count'] > 5) {
+                                        $output[$key1]['summary'][$key2]['violent'] = 1;
+                                    }
                                 }
                             }
                         }

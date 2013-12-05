@@ -98,6 +98,9 @@
         },
         getTemporalData: function() {
             return opts.jsonData.temporal;
+        },
+        getStackAreaData: function() {
+            return opts.jsonData.area;
         }
         /*** /GLOBAL Functions ***/
     });

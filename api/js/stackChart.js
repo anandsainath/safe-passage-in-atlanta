@@ -15,6 +15,7 @@
         defaults: {
             debug: true,
             directions: undefined,
+            crimeStats: undefined,
             svgSelector: undefined,
             dimension: {
                 chartWidth: 1200,
@@ -56,7 +57,48 @@
                 console.log("Init called in stackChart.js");
             }
         },
+        updateChart: function(crimeStatsData) {
+            opts.crimeStats = crimeStatsData;
+            $('.stack-chart').children().remove();
+            var routeLeg = opts.directions.routes[opts.routeNum].legs[0];
+            var totalDistance = routeLeg.distance.value;
+            var xScale = d3.scale.linear().domain([0, totalDistance]).range([opts.dimension.xPadding, opts.dimension.chartWidth - opts.dimension.xPadding]);
+
+            var crimeStats = [];
+            $.each(crimeStatsData[opts.routeNum], function(index, crimeData) {
+                var obj = {"key": crimeData.key};
+                var value = [];
+                var xCoordinate;
+                $.each(crimeData.value, function(index, amtOfCrime) {
+                    xCoordinate = opts.points[index] * opts.multiplier;
+                    if (!isNaN(xCoordinate)) {
+                        value.push([xCoordinate, amtOfCrime]);
+                    }
+                });
+                obj.values = value;
+                crimeStats.push(obj);
+            });
+
+            nv.addGraph(function() {
+                var chart = nv.models.stackedAreaChart()
+                        .useInteractiveGuideline(true)
+                        .x(function(d) {
+                            return xScale(d[0]);
+                        })
+                        .y(function(d) {
+                            return d[1];
+                        });
+
+                chart.yAxis
+                        .tickFormat(d3.format('f'));
+                d3.select('svg.stack-chart').datum(crimeStats)
+                        .transition().duration(500).call(chart);
+                nv.utils.windowResize(chart.update);
+                return chart;
+            });
+        },
         showStackedChart: function(routeNum) {
+            opts.routeNum = routeNum;
             var routeLeg = opts.directions.routes[routeNum].legs[0];
             var totalDistance = routeLeg.distance.value;
             var xScale = d3.scale.linear().domain([0, totalDistance]).range([opts.dimension.xPadding, opts.dimension.chartWidth - opts.dimension.xPadding]);
@@ -169,55 +211,61 @@
     /** Helper functions in the scope of the plugin **/
     var methods = {
         computeOverviewCoordinates: function(routeNum, totalDistance) {
+            var wayPoints = [], points = [];
 
-            var overview_path = opts.directions.routes[routeNum].overview_path;
+            wayPoints.push({"x": opts.directions.routes[routeNum].legs[0].start_location.qb, "y": opts.directions.routes[routeNum].legs[0].start_location.pb});
+            $.each(opts.directions.routes[routeNum].legs[0].steps, function(index, steps) {
+                $.each(steps.path, function(index, point) {
+                    wayPoints.push({"x": point.qb, "y": point.pb});
+                });
+                wayPoints.push({"x": steps.end_location.qb, "y": steps.end_location.pb});
+            });
+
             var pathDistance = 0, temp, multiplier;
-            var wayPoints = [];
-            for (var index = 0; index < overview_path.length - 1; index++) {
-                temp = Math.sqrt(Math.pow((overview_path[index + 1].qb - overview_path[index].qb), 2) + Math.pow((overview_path[index + 1].pb - overview_path[index].pb), 2));
+            for (var index = 0; index < wayPoints.length - 1; index++) {
+                temp = Math.sqrt(Math.pow((wayPoints[index + 1].x - wayPoints[index].x), 2) + Math.pow((wayPoints[index + 1].y - wayPoints[index].y), 2));
                 pathDistance += temp;
-                wayPoints.push(pathDistance);
+                points.push(pathDistance);
             }
+            opts.points = points;
+
             multiplier = (totalDistance / pathDistance);
+            opts.multiplier = multiplier;
 
-            var crimeSummary = [];
-            var theft = [], kidnapping = [], carJacking = [];
-            var totalCrime = [];
-            var xCoordinate, tdatum, kdatum, cdatum, totDatum, maxCrimePoint = 0;
-            for (var index = 0; index < wayPoints.length; index++) {
-                xCoordinate = wayPoints[index] * multiplier;
-                tdatum = Math.floor((Math.random() * 400) + 1) + 20;
-                kdatum = Math.floor((Math.random() * 200) + 1) + 30;
-                cdatum = Math.floor((Math.random() * 300) + 1) + 30;
-                theft.push([xCoordinate, tdatum]);
-                kidnapping.push([xCoordinate, kdatum]);
-                carJacking.push([xCoordinate, cdatum]);
-                totDatum = cdatum + kdatum + tdatum;
-                maxCrimePoint = Math.max(totDatum, maxCrimePoint);
-                totalCrime.push([xCoordinate, totDatum]);
+            var crimeStats = [];
+            var totalCrimeData = [];
+            $.each(opts.crimeStats[routeNum], function(index, crimeData) {
+                var obj = {"key": crimeData.key};
+                var value = [];
+                var xCoordinate;
+                $.each(crimeData.value, function(index, amtOfCrime) {
+                    xCoordinate = points[index] * multiplier;
+                    if (!isNaN(xCoordinate)) {
+                        value.push([xCoordinate, amtOfCrime]);
+                    }
+                });
+                obj.values = value;
+                crimeStats.push(obj);
+            });
+
+            var maxCrimePoint = 0;
+            for (var index = 0; index < crimeStats[0].values.length; index++) {
+                var totalValue = 0;
+                for (var y = 0; y < crimeStats.length; y++) {
+                    totalValue += crimeStats[y].values[index][1];
+                }
+                maxCrimePoint = Math.max(totalValue, maxCrimePoint);
+                totalCrimeData.push([crimeStats[0].values[index][0], totalValue]);
             }
-            opts.maxCrimePoint = maxCrimePoint;
+            //totalCrimeData.pop();
 
-            for (var index = 0; index < totalCrime.length; index++) {
-                totalCrime[index][1] = totalCrime[index][1] / maxCrimePoint;
+            for (var index = 0; index < totalCrimeData.length; index++) {
+                totalCrimeData[index][1] = totalCrimeData[index][1] / maxCrimePoint;
             }
-
-            crimeSummary.push({
-                "key": "Theft",
-                "values": theft
-            });
-            crimeSummary.push({
-                "key": "Kidnapping",
-                "values": kidnapping
-            });
-            crimeSummary.push({
-                "key": "Car Jacking",
-                "values": carJacking
-            });
 
             return {
-                "summary": crimeSummary,
-                "total": totalCrime
+                "summary": crimeStats,
+                "total": totalCrimeData
             };
         }
     };
