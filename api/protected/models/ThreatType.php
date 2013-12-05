@@ -43,61 +43,78 @@ class ThreatType extends CActiveRecord {
         $line_string .= ']),4326)';
         return $line_string;
     }
-    
-    public function getNodeLinkData($routes)
-        {
-            //INSERT all values into temo table
-            $sql_insert = 'INSERT INTO "temp_NodeLink" VALUES ';
-            foreach($routes as $route)
-            {
-                foreach($route['points'] as $point)
-                {
-                    $values[] = '(DEFAULT,ST_SetSRID(ST_MakePoint('.$point['latitude'].','.$point['longitude'].'),4326), '.$route['route'].')';
-                }
+
+    public function constructMultiLineString($routes) {
+        $multi_string = "st_setsrid(st_geomfromtext('MULTILINESTRING(";
+        foreach ($routes as $route) {
+            $multi_string .= '(';
+            foreach ($route['points'] as $pointIndex => $point) {
+                $multi_string .= $point['latitude'] . " " . $point['longitude'] . ',';
             }
-            
-            $sql_insert = $sql_insert.implode(',', $values);
-            $connection=Yii::app()->db;
-            $command=$connection->createCommand($sql_insert);
-            $command->queryAll();
-            
-            
-            //Query Data from the DB
-            $sql_select = 'WITH tempData AS (SELECT * FROM "temp_NodeLink") 
-                            SELECT DISTINCT ON (tempData.routeid,tempData.order)
-                            tempData.routeid as id,ST_X(ST_PointOnSurface(tempData.location)) as lat,ST_Y(ST_PointOnSurface(tempData.location)) as long,threat.id_threattype as threat,COUNT(*) AS count
-                              FROM  tempData,"tbl_ThreatData" as threat
-                              WHERE ST_DWithin(threat.location,tempData.location ,.001)
-                              GROUP BY threat.id_threattype,tempData.routeid,tempData.order,tempData.location
-                              ORDER BY tempData.routeid,tempData.order,count DESC';
-            
-            $connection=Yii::app()->db;
-            $command=$connection->createCommand($sql_select);
-            $results=$command->queryAll();
-            
-            //DELETE data from the temp table
-            $sql_delete = 'DELETE FROM "temp_NodeLink"';
-            $connection=Yii::app()->db;
-            $command=$connection->createCommand($sql_delete);
-            $command->queryAll();
-            
-            return $results;
+            $multi_string = rtrim($multi_string, ',');
+            $multi_string .= '),';
         }
+        $multi_string = rtrim($multi_string, ',');
+        $multi_string .= ")'),4326)";
+        return $multi_string;
+    }
+
+    public function getNodeLinkData($routes, $waypoints, $threshold, $date) {
+        //INSERT all values into temo tabl
+        $multiline = $this->constructMultiLineString($waypoints);
+
+        $sql_insert = 'INSERT INTO "temp_NodeLink" VALUES ';
+        foreach ($routes as $route) {
+            foreach ($route['points'] as $point) {
+                $values[] = '(DEFAULT,ST_SetSRID(ST_MakePoint(' . $point['latitude'] . ',' . $point['longitude'] . '),4326), ' . $route['route'] . ')';
+            }
+        }
+
+        $sql_insert = $sql_insert . implode(',', $values);
+        $connection = Yii::app()->db;
+        $command = $connection->createCommand($sql_insert);
+        $command->queryAll();
+
+        //Query Data from the DB
+        $sql_select = "WITH threat AS (SELECT * FROM \"tbl_ThreatData\"
+                            WHERE ST_DWithin(location," . $multiline . "," . $threshold . ")
+                            and occur_timestamp >= to_timestamp('" . $date . "','MM/DD/YYYY'))
+                            SELECT DISTINCT ON (tempData.routeid,tempData.order)
+                            tempData.routeid as id,ST_X(ST_PointOnSurface(tempData.location)) as lat,
+                            ST_Y(ST_PointOnSurface(tempData.location)) as long,threat.id_threattype as threat,COUNT(*) AS count,
+                            (tempData.order) as link
+                            FROM  threat,\"temp_NodeLink\" as tempData
+                            WHERE ST_DWithin(threat.location,tempData.location ," . $threshold . ")
+                            GROUP BY threat.id_threattype,tempData.routeid,tempData.order,tempData.location
+                            ORDER BY tempData.routeid,tempData.order,count DESC;";
+
+        $connection = Yii::app()->db;
+        $command = $connection->createCommand($sql_select);
+        $results = $command->queryAll();
+
+        //DELETE data from the temp table
+        $sql_delete = 'DELETE FROM "temp_NodeLink"';
+        $connection = Yii::app()->db;
+        $command = $connection->createCommand($sql_delete);
+        $command->queryAll();
+
+        return $results;
+    }
 
     //dei poda
     public function getSparklineData($routes) {
         $outputs = array();
-        
+
         function daySort($a, $b) {
             $weekdays = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
             return array_search($a['day'], $weekdays) - array_search($b['day'], $weekdays);
         }
-        
+
         function timeSort($a, $b) {
             $shifts = array("Morning", "Afternoon", "Evening", "Night");
             return array_search($a['time'], $shifts) - array_search($b['time'], $shifts);
         }
-        
+
 //        $sql = array();
 //        foreach ($routes as $route) {
 //            $line_string = $this->constructPolyline($route);
@@ -109,7 +126,7 @@ class ThreatType extends CActiveRecord {
 //        $command = $connection->createCommand($sql_all);
 //        $max_count = $command->queryAll();
         $max_count = 0;
-        foreach($routes as $route) {
+        foreach ($routes as $route) {
             $line_string = $this->constructPolyline($route);
             $sql_day = 'select day, count(*) as overall from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day order by overall desc';
             $connection = Yii::app()->db;
@@ -159,7 +176,7 @@ class ThreatType extends CActiveRecord {
                         if ($dayIndex['day'] == $result['day']) {
                             foreach ($dayIndex['summary'] as $key2 => $summary) {
                                 if ($summary['time'] == $result['shift']) {
-                                    $output[$key1]['summary'][$key2]['violent'] = ($result['violentyn'] == 1) ? 1 : 0;
+                                    $output[$key1]['summary'][$key2]['violent'] = ($result['violentyn'] == 'Y') ? 1 : 0;
                                 }
                             }
                         }
@@ -193,12 +210,12 @@ class ThreatType extends CActiveRecord {
                     for ($i = 0; $i < 6; $i++) {
                         if (array_key_exists($i, $sparkline[$day['day']][$shift])) {
                             if (array_key_exists('N', $sparkline[$day['day']][$shift][$i])) {
-                                $micro_nonviolent[] = $sparkline[$day['day']][$shift][$i]['N'];///$max_count[0]['count'];
+                                $micro_nonviolent[] = $sparkline[$day['day']][$shift][$i]['N']; ///$max_count[0]['count'];
                             } else {
                                 $micro_nonviolent[] = 0;
                             }
                             if (array_key_exists('Y', $sparkline[$day['day']][$shift][$i])) {
-                                $micro_violent[] = $sparkline[$day['day']][$shift][$i]['Y'];///$max_count[0]['count'];
+                                $micro_violent[] = $sparkline[$day['day']][$shift][$i]['Y']; ///$max_count[0]['count'];
                             } else {
                                 $micro_violent[] = 0;
                             }
@@ -208,8 +225,7 @@ class ThreatType extends CActiveRecord {
                         $micro_total = array_map(function () {
                             return array_sum(func_get_args());
                         }, $micro_violent, $micro_nonviolent);
-                        $max_count = (max($micro_total) > $max_count)? max($micro_total) : $max_count;
-                        
+                        $max_count = (max($micro_total) > $max_count) ? max($micro_total) : $max_count;
                     }
                     $output[$dayID]['detailed'][] = array(
                         'day' => $day['day'],
@@ -224,20 +240,21 @@ class ThreatType extends CActiveRecord {
             }
             $outputs[] = $output;
         }
-        
+
         foreach ($outputs as $outputID => $output) {
-            foreach($output as $dayID => $day) {
-                foreach($day['detailed'] as $shiftID => $shift) {
+            foreach ($output as $dayID => $day) {
+                foreach ($day['detailed'] as $shiftID => $shift) {
                     foreach ($shift['total'] as $microshiftID => $microshift) {
                         //return $max_count;
                         $outputs[$outputID][$dayID]['detailed'][$shiftID]['total'][$microshiftID] = $microshift / $max_count;
+                        $outputs[$outputID][$dayID]['detailed'][$shiftID]['violent'][$microshiftID] = $outputs[$outputID][$dayID]['detailed'][$shiftID]['violent'][$microshiftID] / $max_count;
                     }
                 }
             }
         }
         return $outputs;
     }
-    
+
     public function getStackGraph($route) {
         $line_string = $this->constructPolyline($route);
         $sql = "insert into line values ($line_string) ";

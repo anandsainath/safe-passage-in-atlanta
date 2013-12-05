@@ -48,7 +48,6 @@
             onEventOccured: function(eventType, isSelected, eventArgs) {
             },
             processEvent: function(event, isSelected, args) {
-                console.log("Inside temporalDetailed.js");
                 switch (event) {
                     case 'selected-row':
                         methods.processRowClicked(d3.select(d3.selectAll('.dayAggG')[0][args]), isSelected, args, false);
@@ -84,7 +83,6 @@
             methods.drawViz();
         },
         processEvent: function(event, isSelected, args) {
-            console.log("Inside temporalOverview.js");
             switch (event) {
                 case 'selected-row':
                     methods.processRowClicked(d3.select(d3.selectAll('.dayAggG')[0][args]), isSelected, args, false);
@@ -346,7 +344,6 @@
                                                 return "translate(" + (10 + (index * opts.dimension.padding.breakupPadding)) + ", 0)";
                                             })
                                             .on("click", function(datum, index) {
-                                                //console.log(datum);
                                                 var _this = d3.select(this);
                                                 var thisClass = _this.attr("class");
                                                 var isSelected = (thisClass.indexOf("js-clicked") === -1) ? true : false;
@@ -395,7 +392,7 @@
                                             })
                                             .each(function(datum, index) {
                                                 var circleG = d3.select(this);
-                                                var violentCrimeScale = d3.scale.linear().domain([0, 5]).range([0, 20]);
+                                                var violentCrimeScale = d3.scale.linear().domain([0, 1]).range([0, 20]);
 
                                                 circleG.append("line")
                                                         .attr("x1", 0)

@@ -33,65 +33,13 @@ function initialize() {
     });
 }
 
-//function beginSearch(origin, destination, wayPoints, transitMode) {
-//    console.log(origin, destination, wayPoints, transitMode);
-//    minX = 100, maxX = -100, minY = 100, maxY = -100;
-//    if (directionsService) {
-//        var travelMode = google.maps.TravelMode.DRIVING;
-//        switch (transitMode) {
-//            case "private":
-//                travelMode = google.maps.TravelMode.DRIVING;
-//                break;
-//            case "public":
-//                travelMode = google.maps.TravelMode.TRANSIT;
-//                break;
-//            case "walk":
-//                travelMode = google.maps.TravelMode.WALKING;
-//                break;
-//            case "cycle":
-//                travelMode = google.maps.TravelMode.BICYCLING;
-//                break;
-//        }
-//
-//        $('#nodeLink svg').children().remove();
-//        var routeOptions = {
-//            origin: origin,
-//            destination: destination,
-//            waypoints: wayPoints,
-//            provideRouteAlternatives: true,
-//            travelMode: travelMode,
-//            unitSystem: google.maps.UnitSystem.IMPERIAL
-//        };
-//
-//        console.log(routeOptions);
-//
-//        directionsService.route(routeOptions, function(result, status) {
-//            if (status === google.maps.DirectionsStatus.OK) {
-//                mapDirections = result;
-//                console.log(mapDirections);
-//                showRouteSummary();
-//                showNodeLink(ACTUAL_REPRESENTATION);
-//            } else {
-//                switch (status) {
-//                    case "ZERO_RESULTS":
-//                        $('#suggestedRoutesList').empty().append('<li> No results found! </li>');
-//                        break;
-//                    default:
-//                        $('#suggestedRoutesList').empty().append('<li> ' + status + ' </li>');
-//                }
-//            }
-//        });
-//    }
-//
-//}
-
 function showRouteSummary() {
     var $ol = $('#suggestedRoutesList').empty();
     $.each(mapDirections.routes, function(index, data) {
         var $roadSpan = $('<span class="road">' + data.summary + '</span>');
         var $timeSpan = $('<span class="time-miles">' + data.legs[0].distance.text + ", " + data.legs[0].duration.text + '</span>');
 
-        var $li = $('<li class="row" data-route="'+index+'"></li>');
+        var $li = $('<li class="row" data-route="' + index + '"></li>');
         $li.append($roadSpan).append($timeSpan);
 
         $li.hover(function() {
@@ -117,8 +65,10 @@ function showNodeLink(representation) {
     $('#nodeLink svg').children().remove();
 
     mapDirections = $.googleDirections.getRoutes();
+    nodeLink = $.googleDirections.getNodeLinkData();
     showRouteSummary();
-    var json = getNodeRepresentation(mapDirections);
+    var json = getNodeRepresentation(nodeLink);
+    console.log(json);
     drawForceDirectedNodeLink(json);
 }
 
@@ -412,70 +362,133 @@ function drawCircle(svg, index, datum, route, falseCircle) {
             .attr("route", JSON.stringify([route]));
 }
 
-function getNodeRepresentation(result) {
-    var nodes = [];
-    var links = [];
-
-    var index = 0;
-    var prevPos;
-    var colorIndex = 0;
-    var routeStepSize;
-    //console.log("result", result);
-    $.each(result.routes, function(routeCount, route) {
-        routeStepSize = route.legs[0].steps.length;
-        $.each(route.legs[0].steps, function(step_num, step) {
-            var spoint, spos, epoint, epos;
-            if (step_num == 0) {
-                //adding the starting location here..
-                getMinMax(step.start_point.qb, step.start_point.pb);
-                spoint = {"x": step.start_point.qb, "y": step.start_point.pb, "fixed": true, "route": [routeCount]};
-                spos = getIndex(nodes, spoint);
-                if (spos == INVALID_INDEX) {
-                    spos = nodes.length;
-                    nodes.push(spoint);
-                    startPoint = spoint;
-                    console.log(spoint, "startpoint");
-                } else {
-                    nodes[spos]["route"].push(routeCount);
+function getNodeRepresentation2(nodeLink) {
+    var nodes = [],
+            links = [];
+    var prevRouteID = -1;
+    var spoint, spos, epoint, epos = INVALID_INDEX;
+    endPoint = undefined;
+    $.each(nodeLink, function(index, datum) {
+        if (prevRouteID !== datum.id) {
+            if (epos !== INVALID_INDEX) {
+                endPoint = nodes[epos];
+                console.log(endPoint, "end point");
+                nodes[epos]["fixed"] = true;
+            }
+            prevRouteID = datum.id;
+            getMinMax(parseFloat(datum.long), parseFloat(datum.lat));
+            spoint = {"x": parseFloat(datum.long), "y": parseFloat(datum.lat), "fixed": true, "route": [datum.id], "radius": datum.count, "threat": datum.threat};
+            spos = getIndex(nodes, spoint);
+            if (spos === INVALID_INDEX) {
+                spos = nodes.length;
+                nodes.push(spoint);
+                startPoint = spoint;
+                console.log(spoint, "startpoint");
+            } else {
+                if (nodes[spos]["route"].indexOf(datum.id) === INVALID_INDEX) {
+                    nodes[spos]["route"].push(datum.id);
                 }
             }
-            getMinMax(step.end_point.qb, step.end_point.pb);
-            epoint = {"x": step.end_point.qb, "y": step.end_point.pb, "count": 1, "route": [routeCount]};
-            if ((routeStepSize - 1) == step_num) {
-                epoint["fixed"] = true;
-                endPoint = epoint;
-            } else {
-                epoint["fixed"] = false;
-            }
+        }
 
-            epos = getIndex(nodes, epoint);
-            if (epos == INVALID_INDEX) {
-                epos = nodes.length;
-                nodes.push(epoint);
-            } else {
-                nodes[epos]["route"].push(routeCount);
-            }
+        getMinMax(parseFloat(datum.long), parseFloat(datum.lat));
+        epoint = {"x": parseFloat(datum.long), "y": parseFloat(datum.lat), "count": 1, "route": [datum.id], "radius": datum.count, "threat": datum.threat};
+        epoint["fixed"] = false; // logic for fixing the end point to be determined..
 
-            if (step_num == 0) {
-                prevPos = epos;
-                links.push({"source": spos, "target": epos, "color": colors(colorIndex), "route": JSON.stringify([colorIndex])});
-            } else {
-                links.push({"source": prevPos, "target": epos, "color": colors(colorIndex), "route": JSON.stringify([colorIndex])});
-                prevPos = epos;
+        epos = getIndex(nodes, epoint);
+        if (epos === INVALID_INDEX) {
+            epos = nodes.length;
+            nodes.push(epoint);
+        } else {
+            if (nodes[epos]["route"].indexOf(datum.id) === INVALID_INDEX) {
+                nodes[epos]["route"].push(datum.id);
             }
-
-            //console.log("Step " + step_num + ": " + step.instructions);
-            //console.log("Step Distance: " + step.distance.text);
-            //console.log("Step Duration: " + step.duration.text);
-            //console.log("End point on map (" + step.end_point.ob + "," + step.end_point.pb + ")");
-        });
-        colorIndex++;
-        //return false;
+        }
     });
-    //console.log(minX, maxX, minY, maxY);
+
+    if (!endPoint) {
+        endPoint = nodes[epos];
+        console.log("Setting epos here!");
+    }
+
+    var index = 0;
+    while (index < nodeLink.length) {
+        if (index < nodeLink.length - 1 && nodeLink[index].id === nodeLink[index + 1].id) {
+            var spos = getIndex(nodes, {"x": parseFloat(nodeLink[index].long), "y": parseFloat(nodeLink[index].lat)});
+            var epos = getIndex(nodes, {"x": parseFloat(nodeLink[index + 1].long), "y": parseFloat(nodeLink[index + 1].lat)});
+            links.push({"source": spos, "target": epos, "color": colors(nodeLink[index].id), "route": JSON.stringify([nodeLink[index].id])});
+            index++;
+        } else {
+            index++;
+        }
+    }
     return normalizeNodes(nodes, links, minX, maxX, minY, maxY);
 }
 
+/*function getNodeRepresentation2(result) {
+ var nodes = [];
+ var links = [];
+ 
+ var index = 0;
+ var prevPos;
+ var colorIndex = 0;
+ var routeStepSize;
+ //console.log("result", result);
+ $.each(result.routes, function(routeCount, route) {
+ routeStepSize = route.legs[0].steps.length;
+ $.each(route.legs[0].steps, function(step_num, step) {
+ var spoint, spos, epoint, epos;
+ if (step_num == 0) {
+ //adding the starting location here..
+ getMinMax(step.start_point.qb, step.start_point.pb);
+ spoint = {"x": step.start_point.qb, "y": step.start_point.pb, "fixed": true, "route": [routeCount]};
+ spos = getIndex(nodes, spoint);
+ if (spos == INVALID_INDEX) {
+ spos = nodes.length;
+ nodes.push(spoint);
+ startPoint = spoint;
+ console.log(spoint, "startpoint");
+ } else {
+ nodes[spos]["route"].push(routeCount);
+ }
+ }
+ getMinMax(step.end_point.qb, step.end_point.pb);
+ epoint = {"x": step.end_point.qb, "y": step.end_point.pb, "count": 1, "route": [routeCount]};
+ if ((routeStepSize - 1) == step_num) {
+ epoint["fixed"] = true;
+ endPoint = epoint;
+ } else {
+ epoint["fixed"] = false;
+ }
+ 
+ epos = getIndex(nodes, epoint);
+ if (epos == INVALID_INDEX) {
+ epos = nodes.length;
+ nodes.push(epoint);
+ } else {
+ nodes[epos]["route"].push(routeCount);
+ }
+ 
+ if (step_num == 0) {
+ prevPos = epos;
+ links.push({"source": spos, "target": epos, "color": colors(colorIndex), "route": JSON.stringify([colorIndex])});
+ } else {
+ links.push({"source": prevPos, "target": epos, "color": colors(colorIndex), "route": JSON.stringify([colorIndex])});
+ prevPos = epos;
+ }
+ 
+ //console.log("Step " + step_num + ": " + step.instructions);
+ //console.log("Step Distance: " + step.distance.text);
+ //console.log("Step Duration: " + step.duration.text);
+ //console.log("End point on map (" + step.end_point.ob + "," + step.end_point.pb + ")");
+ });
+ colorIndex++;
+ //return false;
+ });
+ //console.log(minX, maxX, minY, maxY);
+ return normalizeNodes(nodes, links, minX, maxX, minY, maxY);
+ }
+ */
 function normalizeNodes(nodes, links, minX, maxX, minY, maxY) {
     //console.log(chartWidth, chartHeight);
     //console.log(maxX - minX);
@@ -495,9 +508,9 @@ function normalizeNodes(nodes, links, minX, maxX, minY, maxY) {
         y = parseInt((maxY - nodes[index]["y"]) * (yMultiplier / scalingFactor)) + heightPadding;
         newNodeIndex = links.length;
         if (showActualRepresentation) {
-            newNodes.push({"x": x, "y": y, "radius": Math.floor((Math.random() * 10) + 15), "fixed": true, "route": nodes[index]["route"]});
+            newNodes.push({"x": x, "y": y, "radius": nodes[index]["radius"], "threat": nodes[index]["threat"], "fixed": true, "route": nodes[index]["route"]});
         } else {
-            newNodes.push({"x": x, "y": y, "radius": Math.floor((Math.random() * 10) + 15), "fixed": nodes[index]["fixed"], "route": nodes[index]["route"]});
+            newNodes.push({"x": x, "y": y, "radius": nodes[index]["radius"], "threat": nodes[index]["threat"], "fixed": nodes[index]["fixed"], "route": nodes[index]["route"]});
         }
     }
     startPoint.x = parseInt((startPoint.x - minX) * (xMultiplier / scalingFactor)) + widthPadding;

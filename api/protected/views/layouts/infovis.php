@@ -1,12 +1,12 @@
 
-<?php //the theme file for the entire site.                            ?>
+<?php //the theme file for the entire site.                                  ?>
 <!DOCTYPE html>
 <html>
     <head>
         <title>Safe Passage in Atlanta</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <!-- jQuery -->
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script src="lib/d3.min.js"></script>
         <!-- Bootstrap -->
         <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
@@ -135,6 +135,17 @@
                     transitMode = $(this).attr('id');
                     doSearch();
                 });
+
+                $('#tempSliderBtnRight').click(function() {
+                    console.log("Clicked!");
+                    $('#page2').fadeOut('slow', function() {
+                        $(this).hide();
+                        $('#page1').fadeIn('slow', function() {
+                            $('#right-bar').show();
+                            $('#sliderBtnRight').trigger('click');
+                        });
+                    });
+                });
             });
 
             function loadPage2(routeID) {
@@ -149,23 +160,21 @@
                 });
                 $.stackChart.showStackedChart(routeID);
 
-                $.getJSON("http://dev.infovis.com/temporal-view-data", function(data) {
-                    $.temporalOverview({
-                        svgSelector: '#overview > svg',
-                        data: data,
-                        onEventOccured: function(eventType, isSelected, eventArgs) {
-                            console.log(eventType, isSelected, eventArgs);
-                            $.temporalDetailed.processEvent(eventType, isSelected, eventArgs);
-                        }
-                    });
+                $.temporalOverview({
+                    svgSelector: '#overview > svg',
+                    data: $.googleDirections.getTemporalData(),
+                    onEventOccured: function(eventType, isSelected, eventArgs) {
+                        console.log(eventType, isSelected, eventArgs);
+                        $.temporalDetailed.processEvent(eventType, isSelected, eventArgs);
+                    }
+                });
 
-                    $.temporalDetailed({
-                        svgSelector: '#detailed > svg',
-                        data: data,
-                        onEventOccured: function(eventType, isSelected, eventArgs) {
-                            $.temporalOverview.processEvent(eventType, isSelected, eventArgs);
-                        }
-                    });
+                $.temporalDetailed({
+                    svgSelector: '#detailed > svg',
+                    data: $.googleDirections.getTemporalData(),
+                    onEventOccured: function(eventType, isSelected, eventArgs) {
+                        $.temporalOverview.processEvent(eventType, isSelected, eventArgs);
+                    }
                 });
 
                 $('.js-tab-btn').click(function() {

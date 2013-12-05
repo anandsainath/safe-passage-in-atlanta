@@ -74,7 +74,6 @@
             methods.drawViz();
         },
         processEvent: function(event, isSelected, args) {
-            console.log("Inside temporalOverview.js");
             switch (event) {
                 case 'selected-row':
                     methods.processRowClicked(d3.select(d3.selectAll('.dayAggG')[0][args]), isSelected, args, false);
@@ -132,7 +131,6 @@
             }
         },
         processRowClicked: function(_this, isSelected, datum, isSource) {
-            console.log("Datum", datum);
             var y = 22 + (datum * opts.dimension.row.height);
             if (datum > 4) {
                 y += opts.dimension.padding.weekendPadding;
@@ -202,7 +200,6 @@
                     .attr("transform", "translate(" + opts.dimension.padding.left + "," + "40)");
 
             opts.boundingRect = boundingRect;
-
             boundingRect.selectAll('.dayOverview').data(opts.data).enter()
                     .append("g")
                     .attr("class", "dayOverview")
@@ -214,9 +211,7 @@
                         return "translate(0," + y + ")";
                     })
                     .each(function(datum, index) {
-                        //console.log(datum);
                         var dayOverview = d3.select(this);
-
                         dayOverview.append("g").attr("class", "dayAggG")
                                 .attr("transform", "translate(0,20)")
                                 .each(function(datum, index) {
@@ -398,7 +393,6 @@
                                             })
                                             .each(function(datum, index) {
                                                 var circleG = d3.select(this);
-
                                                 circleG.append("circle")
                                                         .attr("cx", 30)
                                                         .attr("cy", 30)
