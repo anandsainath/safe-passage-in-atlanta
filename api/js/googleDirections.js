@@ -75,7 +75,7 @@
             directionsService.route(routeOptions, function(result, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
                     opts.mapDirections = result;
-
+                    console.log(result);
                     $.post('http://dev.infovis.com/get-data', {"json_string": JSON.stringify(result)}, function(data) {
                         opts.jsonData = $.parseJSON(data);
                         opts.onDataLoaded.call(this);

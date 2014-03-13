@@ -59,7 +59,7 @@
             }
         },
         getSelectedRouteID: function() {
-            if(opts.routeNum === undefined){
+            if (opts.routeNum === undefined) {
                 opts.routeNum = 0;
             }
             console.log(opts.routeNum, "route num");
@@ -222,12 +222,12 @@
         computeOverviewCoordinates: function(routeNum, totalDistance) {
             var wayPoints = [], points = [];
 
-            wayPoints.push({"x": opts.directions.routes[routeNum].legs[0].start_location.qb, "y": opts.directions.routes[routeNum].legs[0].start_location.pb});
+            wayPoints.push({"x": opts.directions.routes[routeNum].legs[0].start_location.A, "y": opts.directions.routes[routeNum].legs[0].start_location.k});
             $.each(opts.directions.routes[routeNum].legs[0].steps, function(index, steps) {
                 $.each(steps.path, function(index, point) {
-                    wayPoints.push({"x": point.qb, "y": point.pb});
+                    wayPoints.push({"x": point.A, "y": point.k});
                 });
-                wayPoints.push({"x": steps.end_location.qb, "y": steps.end_location.pb});
+                wayPoints.push({"x": steps.end_location.A, "y": steps.end_location.k});
             });
 
             var pathDistance = 0, temp, multiplier;
@@ -250,7 +250,7 @@
                 $.each(crimeData.value, function(index, amtOfCrime) {
                     xCoordinate = points[index] * multiplier;
                     if (!isNaN(xCoordinate)) {
-                        value.push([xCoordinate, amtOfCrime]);
+                        value.push([xCoordinate, parseInt(amtOfCrime)]);
                     }
                 });
                 obj.values = value;
@@ -272,6 +272,7 @@
                 totalCrimeData[index][1] = totalCrimeData[index][1] / maxCrimePoint;
             }
 
+            console.log("Result", crimeStats, totalCrimeData);
             return {
                 "summary": crimeStats,
                 "total": totalCrimeData
