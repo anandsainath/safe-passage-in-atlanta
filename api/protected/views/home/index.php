@@ -31,7 +31,7 @@ $cs->registerScriptFile($base_url . '/js/temporalDetailed.js', CClientScript::PO
             var from = wayPoints.splice(0, 1)[0],
                     to = wayPoints.pop();
             $.googleDirections.getDirections(from, to, wayPoints, data.mode);
-            
+
             drawMap('33.78302,-84.394401');
             requestDirections(from, to, wayPoints, 0, true, data.mode);
         });

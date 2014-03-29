@@ -1,5 +1,5 @@
 
-<?php //the theme file for the entire site.                                                                  ?>
+<?php //the theme file for the entire site.                                                                    ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -105,8 +105,6 @@
                         easing: 'swing',
                         queue: false,
                         complete: function() {
-                            console.log("Transition is complete!");
-
                         }
                     });
 
@@ -158,7 +156,6 @@
                 });
 
                 $('#tempSliderBtnRight').click(function() {
-                    console.log("Clicked!");
                     $('#page2').fadeOut('slow', function() {
                         $(this).hide();
                         $('#page1').fadeIn('slow', function() {
@@ -186,7 +183,6 @@
                     svgSelector: '#overview > svg',
                     data: $.googleDirections.getTemporalData(),
                     onEventOccured: function(eventType, isSelected, eventArgs) {
-                        console.log(eventType, isSelected, eventArgs);
                         $.temporalDetailed.processEvent(eventType, isSelected, eventArgs);
                     }
                 });
@@ -353,7 +349,6 @@
             }
 
             function requestDirections(start, end, wayPoints, routeToDisplay, main_route) {
-                console.log('inside request directions ' + start);
                 var travelMode = google.maps.TravelMode.DRIVING;
                 switch (transitMode) {
                     case "private":
