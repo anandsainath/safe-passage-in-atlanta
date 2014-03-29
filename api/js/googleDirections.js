@@ -75,8 +75,60 @@
             directionsService.route(routeOptions, function(result, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
                     opts.mapDirections = result;
-                    console.log(result);
-                    $.post('http://dev.infovis.com/get-data', {"json_string": JSON.stringify(result)}, function(data) {
+
+                    var wayPoints = [];
+                    var routes = [];
+                    var routeID = 0;
+
+                    $.each(result.routes, function(index, route) {
+                        var routePoints = [];
+                        var routeEntityPoints = [];
+
+                        $.each(route.legs, function(index, leg) {
+                            var majorWayPoint = {
+                                'latitude': leg.steps[0].start_location.lat(),
+                                'longitude': leg.steps[0].start_location.lng(),
+                                'major': true
+                            };
+                            routePoints.push(majorWayPoint);
+                            routeEntityPoints.push(majorWayPoint);
+
+                            $.each(leg.steps, function(index, step) {
+
+                                $.each(step.path, function(index, pathEntity) {
+                                    routePoints.push({
+                                        'latitude': pathEntity.lat(),
+                                        'longitude': pathEntity.lng(),
+                                        'major': false
+                                    });
+                                });
+
+                                var majorWayPoint = {
+                                    'latitude': step.end_location.lat(),
+                                    'longitude': step.end_location.lng(),
+                                    'major': true
+                                };
+
+                                routePoints.push(majorWayPoint);
+                                routeEntityPoints.push(majorWayPoint);
+                            });
+                        });
+
+                        wayPoints.push({
+                            'points': routePoints
+                        });
+                        routes.push({
+                            'route': routeID,
+                            'points': routeEntityPoints
+                        });
+                    });
+
+                    var parsedResult = {
+                        'wayPoints': wayPoints,
+                        'majorWayPoints': routes
+                    };
+
+                    $.post('http://dev.infovis.com/get-data', {"json_string": JSON.stringify(parsedResult)}, function(data) {
                         opts.jsonData = $.parseJSON(data);
                         opts.onDataLoaded.call(this);
                         console.log(opts.jsonData);
@@ -84,6 +136,7 @@
 
                     if (opts.debug) {
                         console.log(result);
+                        console.log(opts.jsonData);
                     }
                 } else {
                     opts.onError.call(this, status);

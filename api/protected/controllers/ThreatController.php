@@ -6,38 +6,38 @@ class ThreatController extends Controller {
         $this->render('index');
     }
 
-    protected function queryNodeLink($json_string, $waypoints, $threshold, $date) {
+    protected function queryNodeLink($majorWayPoints, $wayPoints, $threshold, $date) {
         //uncomment the line below and remove the function argument if testing from backend
 
-        $json = CJSON::decode($json_string);
+        /* $json = CJSON::decode($json_string);
 
-        $routes = array();
-        foreach ($json['routes'] as $routeid => $route) {
-            $points = array();
-            foreach ($route['legs'] as $leg) {
-                $latitude = $leg['steps'][0]['start_location']['k'];
-                $longitude = $leg['steps'][0]['start_location']['A'];
-                $points[] = array(
-                    'latitude' => $latitude,
-                    'longitude' => $longitude,
-                    'major' => 'true'
-                );
-                foreach ($leg['steps'] as $step) {
-                    $latitude = $step['end_location']['k'];
-                    $longitude = $step['end_location']['A'];
-                    $points[] = array(
-                        'latitude' => $latitude,
-                        'longitude' => $longitude,
-                        'major' => 'true'
-                    );
-                }
-            }
-            $routes[] = array(
-                'route' => $routeid,
-                'points' => $points
-            );
-        }
-        $nodeArray = ThreatType::model()->getNodeLinkData($routes, $waypoints, $threshold, $date);
+          $routes = array();
+          foreach ($json['routes'] as $routeid => $route) {
+          $points = array();
+          foreach ($route['legs'] as $leg) {
+          $latitude = $leg['steps'][0]['start_location']['k'];
+          $longitude = $leg['steps'][0]['start_location']['A'];
+          $points[] = array(
+          'latitude' => $latitude,
+          'longitude' => $longitude,
+          'major' => 'true'
+          );
+          foreach ($leg['steps'] as $step) {
+          $latitude = $step['end_location']['k'];
+          $longitude = $step['end_location']['A'];
+          $points[] = array(
+          'latitude' => $latitude,
+          'longitude' => $longitude,
+          'major' => 'true'
+          );
+          }
+          }
+          $routes[] = array(
+          'route' => $routeid,
+          'points' => $points
+          );
+          } */
+        $nodeArray = ThreatType::model()->getNodeLinkData($majorWayPoints, $wayPoints, $threshold, $date);
 
         $max = 0;
         foreach ($nodeArray as $node) {
@@ -104,14 +104,16 @@ class ThreatController extends Controller {
     }
 
     public function actionGetData() {
-        $json_string = $_POST['json_string'];
+        $data = CJSON::decode($_POST['json_string']);
+        $wayPoints = $data['wayPoints'];
+        $majorWayPoints = $data['majorWayPoints'];
         $threshold = (isset($_POST['threshold'])) ? $_POST['threshold'] : ".001";
         $date = (isset($_POST['start_date'])) ? $_POST['start_date'] : "01/01/2009";
-        $waypoints = $this->parseRoutes($json_string);
-        $temporal = ThreatType::model()->getSparklineData($waypoints, $date, $threshold);
+        //$waypoints = $this->parseRoutes($json_string);
+        $temporal = ThreatType::model()->getSparklineData($wayPoints, $date, $threshold);
 
-        $nodelink = $this->queryNodeLink($json_string, $waypoints, $threshold, $date);
-        $areachart = ThreatType::model()->getStreamGraphData($waypoints, $date, $threshold, null, null);
+        $nodelink = $this->queryNodeLink($majorWayPoints, $wayPoints, $threshold, $date);
+        $areachart = ThreatType::model()->getStreamGraphData($wayPoints, $date, $threshold, null, null);
         $data = array(
             "temporal" => $temporal[0],
             "nodelink" => $nodelink,
