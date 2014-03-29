@@ -112,6 +112,7 @@
                 args.time = time;
             }
             args.json_string = JSON.stringify($.googleDirections.getRoutes());
+            console.log("Calling update-stack-area in detailed..");
             $.post('http://dev.infovis.com/update-stack-area', args, function(data) {
                 $.stackChart.updateChart($.parseJSON(data));
             });
@@ -119,6 +120,7 @@
         processColumnClicked: function(_this, isSelected, index, isSource) {
             var x = 155 + (index * opts.dimension.padding.breakupPadding);
             if (isSelected) {
+                console.log("Inside the true case..");
                 if (!opts.lockInteraction) {
                     methods.removeAllSelected();
                     opts.boundingRect.append("rect")
@@ -136,6 +138,7 @@
                     opts.lockInteraction = true;
                 }
             } else {
+                console.log("Inside the false case.");
                 _this.classed('js-clicked', false);
                 opts.lockInteraction = false;
                 opts.boundingRect.select('.selected-column').remove();
@@ -338,6 +341,7 @@
                         var _this = d3.select(this);
                         var thisClass = _this.attr("class");
                         var isSelected = (thisClass.indexOf("js-clicked") === -1) ? true : false;
+                        console.log("TemporalDetailed going to call processColumnClicked");
                         methods.processColumnClicked(_this, isSelected, index, true);
                     });
 

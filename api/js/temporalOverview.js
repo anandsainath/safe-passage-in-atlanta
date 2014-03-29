@@ -104,6 +104,8 @@
                 args.time = time;
             }
             args.json_string = JSON.stringify($.googleDirections.getRoutes());
+            
+            console.log("Calling update-stack-area in overview..");
             $.post('http://dev.infovis.com/update-stack-area', args, function(data) {
                 $.stackChart.updateChart($.parseJSON(data));
             });

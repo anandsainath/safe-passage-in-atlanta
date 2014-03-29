@@ -26,7 +26,6 @@ function forwardAlpha(layout, alpha, max) {
 }
 
 function initialize() {
-    //console.log("initialize called");
     directionsService = new google.maps.DirectionsService();
     $('.js-input').each(function(index, value) {
         new google.maps.places.Autocomplete($(this)[0]);
@@ -66,6 +65,7 @@ function showNodeLink(representation) {
 
     mapDirections = $.googleDirections.getRoutes();
     nodeLink = $.googleDirections.getNodeLinkData();
+    console.log("I am here!");
     showRouteSummary();
     var json = getNodeRepresentation(nodeLink);
     console.log(json);

@@ -74,8 +74,6 @@
 
             directionsService.route(routeOptions, function(result, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
-                    opts.mapDirections = result;
-
                     var wayPoints = [];
                     var routes = [];
                     var routeID = 0;
@@ -88,7 +86,7 @@
                             var majorWayPoint = {
                                 'latitude': leg.steps[0].start_location.lat(),
                                 'longitude': leg.steps[0].start_location.lng(),
-                                'major': true
+                                'major': "true"
                             };
                             routePoints.push(majorWayPoint);
                             routeEntityPoints.push(majorWayPoint);
@@ -99,14 +97,14 @@
                                     routePoints.push({
                                         'latitude': pathEntity.lat(),
                                         'longitude': pathEntity.lng(),
-                                        'major': false
+                                        'major': "false"
                                     });
                                 });
 
                                 var majorWayPoint = {
                                     'latitude': step.end_location.lat(),
                                     'longitude': step.end_location.lng(),
-                                    'major': true
+                                    'major': "true"
                                 };
 
                                 routePoints.push(majorWayPoint);
@@ -121,13 +119,16 @@
                             'route': routeID,
                             'points': routeEntityPoints
                         });
+                        routeID++;
                     });
 
                     var parsedResult = {
                         'wayPoints': wayPoints,
-                        'majorWayPoints': routes
+                        'majorWayPoints': routes,
+                        'routes': result.routes
                     };
 
+                    opts.mapDirections = parsedResult;
                     $.post('http://dev.infovis.com/get-data', {"json_string": JSON.stringify(parsedResult)}, function(data) {
                         opts.jsonData = $.parseJSON(data);
                         opts.onDataLoaded.call(this);
@@ -136,7 +137,6 @@
 
                     if (opts.debug) {
                         console.log(result);
-                        console.log(opts.jsonData);
                     }
                 } else {
                     opts.onError.call(this, status);

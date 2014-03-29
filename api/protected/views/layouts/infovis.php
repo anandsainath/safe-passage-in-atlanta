@@ -1,5 +1,5 @@
 
-<?php //the theme file for the entire site.                                                           ?>
+<?php //the theme file for the entire site.                                                                  ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -379,18 +379,14 @@
 
 
                 directionsService.route(request, function(result, status) {
-                    if (status == google.maps.DirectionsStatus.OK)
-                    {
-                        if (main_route)
-                        {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        if (main_route) {
                             var rendererOptions = getRendererOptions(true);
-                            for (var i = 0; i < result.routes.length; i++)
-                            {
+                            for (var i = 0; i < result.routes.length; i++) {
                                 renderDirections(result, rendererOptions, i);
                             }
                         }
-                        else
-                        {
+                        else {
                             var rendererOptions = getRendererOptions(false);
                             renderDirections(result, rendererOptions, routeToDisplay);
                         }
