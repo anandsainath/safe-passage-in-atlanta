@@ -260,7 +260,7 @@ class ThreatType extends CActiveRecord {
             $sql_day = 'select day, count(*) as overall from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',.001) group by day order by overall desc';
             $results_day = Yii::app()->db->createCommand($sql_day)->queryAll();
             foreach ($results_day as $result) {
-                $overall[][$result['day']] = $result['overall'] / $results_day[0]['overall'];
+                $overall[$result['day']] = $result['overall'] / $results_day[0]['overall'];
             }
             $sql_heatmap = 'select day, shift, violentyn, count(*) as count from "tbl_ThreatData" where ST_DWithin(location, ' . $line_string . ',' . $threshold . ') ' . $date_query . ' group by day, shift, violentyn '
                     . 'UNION '
