@@ -373,10 +373,12 @@ class ThreatType extends CActiveRecord {
                     foreach ($shift['total'] as $microshiftID => $microshift) {
                         $outputs[$outputID][$dayID]['detailed'][$shiftID]['total'][$microshiftID] = $microshift / $max_count;
                         $outputs[$outputID][$dayID]['detailed'][$shiftID]['violent'][$microshiftID] = $outputs[$outputID][$dayID]['detailed'][$shiftID]['violent'][$microshiftID] / $max_count;
+                        
                     }
                 }
             }
         }
+        $outputs['max_count'] = $max_count;
         return $outputs;
     }
 
