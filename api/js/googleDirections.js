@@ -149,8 +149,8 @@
         getNodeLinkData: function() {
             return opts.jsonData.nodelink;
         },
-        getTemporalData: function() {
-            return opts.jsonData.temporal;
+        getTemporalData: function(routeID) {
+            return opts.jsonData.temporal[routeID];
         },
         getStackAreaData: function() {
             return opts.jsonData.area;

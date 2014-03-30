@@ -38,13 +38,6 @@ $cs->registerScriptFile($base_url . '/js/temporalDetailed.js', CClientScript::PO
     });
 </script>
 <style type="text/css">
-    .bottom-div{
-        position:absolute; 
-        bottom:0px;
-        top:280px;
-        width: 100%;
-    }
-
     .absolute-div{
         position: absolute;
     }
@@ -107,31 +100,16 @@ $cs->registerScriptFile($base_url . '/js/temporalDetailed.js', CClientScript::PO
         <svg  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
     </div>
 </div>
-<div id="page2" style="margin-top: 20px; display: none;">
-    <div id="stackedAreaChart" class="absolute-div">
-        <svg  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="area-chart"></svg>
+<div id="page2" style="display: none;">
+    <div class="row">
+        <div id="stackedAreaChart" class="col-xs-10">
+            <svg  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="area-chart"></svg>
+        </div>
     </div>
-    <div id="bottom-div" class="bottom-div">
-        <div class="btn-group">
-            <button type="button" data-href="#overview" id="overview-tab" class="btn btn-default btn-xs js-tab-btn">Temporal Overview</button>
-            <button type="button" data-href="#detailed" id="detailed-tab" class="btn btn-default btn-xs js-tab-btn">Temporal Detailed</button>
-
-            <div id="tabs" class="itabs">
-                <div id="overview" class="content js-active-tab">
-                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                        <defs>
-                            <marker xmlns="http://www.w3.org/2000/svg" id="mkArrow20-16" viewBox="-15 -5 20 20" refX="0" refY="0" markerUnits="strokeWidth" markerWidth="20" markerHeight="16" orient="auto">
-                                <path d="M -15 -5 L 0 0 L -15 5 z" fill="black"/>
-                            </marker>
-                        </defs>
-                    </svg>
-                </div>
-                <div id="detailed" class="content" style="display: none;">
-                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-
-                    </svg>
-                </div>
-            </div>
+    <div class="row" id="temporalContainer" style="height: 500px; overflow: hidden;"></div>
+    <div class="row">
+        <div id="keyDiv" class="col-xs-10" style="margin-left: 35%">
+            <svg  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ></svg>
         </div>
     </div>
 </div>

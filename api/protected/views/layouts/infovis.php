@@ -1,5 +1,5 @@
 
-<?php //the theme file for the entire site.                                                                    ?>
+<?php //the theme file for the entire site.                                                                                                                                          ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -15,6 +15,7 @@
         <link href="css/ui-lightness/jquery-ui-1.10.3.custom.css" rel="stylesheet">
 
         <script src="js/jquery-ui-1.10.3.custom.js"></script>
+        <script src="bootstrap/js/bootstrap.js"></script>
         <script src="js/nodeLink.js"></script>
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -29,6 +30,7 @@
                     nodeLinkMode = 'actual',
                     thresholdValue = 0.001,
                     startString = undefined;
+            var temporalOverview, temporalDetailed;
 
             $(function() {
                 $.googleDirections({
@@ -171,7 +173,6 @@
                 $('#overview > svg').children().remove();
                 $('#detailed > svg').children().remove();
 
-
                 $.stackChart({
                     svgSelector: '#stackedAreaChart > svg',
                     directions: $.googleDirections.getRoutes(),
@@ -179,21 +180,108 @@
                 });
                 $.stackChart.showStackedChart(routeID);
 
-                $.temporalOverview({
-                    svgSelector: '#overview > svg',
-                    data: $.googleDirections.getTemporalData(),
-                    onEventOccured: function(eventType, isSelected, eventArgs) {
-                        $.temporalDetailed.processEvent(eventType, isSelected, eventArgs);
+                $(document).on('click', '.div-modal', function() {
+                    var routeID = $(this).parent().data().round;
+                    $('.modal').show();
+                    $('#stackedAreaChart > svg').empty();
+                    for (var i = 0; i < $.googleDirections.getRoutes().routes.length; i++) {
+                        if (i === routeID) {
+                            console.log("Showing Route Number: " + routeID);
+                            var modal = $('#temporalContainer').children().eq(i).css('opacity', 1).find('div.div-modal').hide();
+                        } else {
+                            $('#temporalContainer').children().eq(i).css('opacity', 0.20);
+                            var modal = $('#temporalContainer').children().eq(i).find('div.div-modal');
+                            modal.height(910);
+                            modal.width(modal.parent().width());
+                            modal.show();
+                        }
                     }
+                    $.stackChart.showStackedChart(routeID);
+                    $('.modal').hide();
                 });
 
-                $.temporalDetailed({
-                    svgSelector: '#detailed > svg',
-                    data: $.googleDirections.getTemporalData(),
-                    onEventOccured: function(eventType, isSelected, eventArgs) {
-                        $.temporalOverview.processEvent(eventType, isSelected, eventArgs);
-                    }
+                var no_of_columns = 12 / $.googleDirections.getRoutes().routes.length;
+
+                var tpl = '<div class="col-xs-{{no_of_columns}}" data-round="{{round_number}}"><div class="div-modal"></div><div class="bottom-div"><h6>{{route_name}}</h6><ul class="nav nav-pills" style="margin-left: 20%"><li class="active"><a href="#{{overview_tab_id}}" data-toggle="tab">Temporal Overview</a></li><li><a href="#{{detailed_tab_id}}" data-toggle="tab">Temporal Detailed</a></li></ul><div class="tab-content"><div class="tab-pane fade in active" id="{{overview_tab_id}}"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><marker xmlns="http://www.w3.org/2000/svg" id="{{mkArrow_id}}" viewBox="-15 -5 20 20" refX="0" refY="0" markerUnits="strokeWidth" markerWidth="20" markerHeight="16" orient="auto"><path d="M -15 -5 L 0 0 L -15 5 z" fill="black"/></marker></defs></svg></div><div class="tab-pane fade" id="{{detailed_tab_id}}"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg></div></div></div></div>';
+                $('#temporalContainer').empty();
+                $.each($.googleDirections.getRoutes().routes, function(index, route) {
+                    var div = tpl.replace('{{route_name}}', route.summary).replace('{{no_of_columns}}', no_of_columns).replace('{{round_number}}', index);
+                    div = div.replace(/{{overview_tab_id}}/g, 'overview' + index).replace(/{{detailed_tab_id}}/g, 'detailed' + index).replace('{{mkArrow_id', 'mkArrow' + index);
+                    $('#temporalContainer').append(div);
                 });
+
+                for (var i = 0; i < $.googleDirections.getRoutes().routes.length; i++) {
+                    if (i !== routeID) {
+                        $('#temporalContainer').children().eq(i).css('opacity', 0.20);
+
+                        var modal = $('#temporalContainer').children().eq(i).find('div.div-modal');
+                        modal.height(910);
+                        modal.width(modal.parent().width());
+                        modal.show();
+                    }
+                }
+
+                if ($.googleDirections.getRoutes().routes.length === 2) {
+                    $('#temporalContainer').children('div:first').find('div.bottom-div').css('margin-left', '250px');
+                }
+
+                if ($.googleDirections.getRoutes().routes.length >= 1) {
+                    temporalOverview = $('#overview0').temporalOverview({
+                        svgSelector: '#overview0 > svg',
+                        data: $.googleDirections.getTemporalData(0),
+                        onEventOccured: function(eventType, isSelected, eventArgs) {
+                            temporalDetailed.processEvent(eventType, isSelected, eventArgs);
+                        }
+                    });
+
+                    temporalDetailed = $('#detailed0').temporalDetailed({
+                        svgSelector: '#detailed0 > svg',
+                        data: $.googleDirections.getTemporalData(0),
+                        onEventOccured: function(eventType, isSelected, eventArgs) {
+                            temporalOverview.processEvent(eventType, isSelected, eventArgs);
+                        }
+                    });
+
+                    temporalOverview.renderKey();
+                }
+
+                if ($.googleDirections.getRoutes().routes.length >= 2) {
+                    var leftTemporalOverview, leftTemporalDetailed;
+                    leftTemporalOverview = $('#overview1').temporalOverview({
+                        svgSelector: '#overview1 > svg',
+                        data: $.googleDirections.getTemporalData(1),
+                        onEventOccured: function(eventType, isSelected, eventArgs) {
+                            leftTemporalDetailed.processEvent(eventType, isSelected, eventArgs);
+                        }
+                    });
+
+                    leftTemporalDetailed = $('#detailed1').temporalDetailed({
+                        svgSelector: '#detailed1 > svg',
+                        data: $.googleDirections.getTemporalData(1),
+                        onEventOccured: function(eventType, isSelected, eventArgs) {
+                            temporalOverview.processEvent(eventType, isSelected, eventArgs);
+                        }
+                    });
+                }
+
+                if ($.googleDirections.getRoutes().routes.length >= 3) {
+                    var rightTemporalOverview, rightTemporalDetailed;
+                    rightTemporalOverview = $('#overview2').temporalOverview({
+                        svgSelector: '#overview2 > svg',
+                        data: $.googleDirections.getTemporalData(2),
+                        onEventOccured: function(eventType, isSelected, eventArgs) {
+                            rightTemporalDetailed.processEvent(eventType, isSelected, eventArgs);
+                        }
+                    });
+
+                    rightTemporalDetailed = $('#detailed2').temporalDetailed({
+                        svgSelector: '#detailed2 > svg',
+                        data: $.googleDirections.getTemporalData(2),
+                        onEventOccured: function(eventType, isSelected, eventArgs) {
+                            rightTemporalOverview.processEvent(eventType, isSelected, eventArgs);
+                        }
+                    });
+                }
 
                 $('.js-tab-btn').click(function() {
                     var targetID = $(this).data('href');
@@ -205,6 +293,24 @@
                     });
                 });
                 $('.modal').hide();
+
+                $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+                    switch ($(e.target).attr('href')) {
+                        case '#overview0':
+                        case '#overview1':
+                        case '#overview2':
+                            $('#keyDiv > svg').empty();
+                            temporalOverview.renderKey();
+                            break;
+                        case '#detailed0':
+                        case '#detailed1':
+                        case '#detailed2':
+                            $('#keyDiv > svg').empty();
+                            temporalDetailed.renderKey();
+                            break;
+                    }
+                    console.log($(e.target).attr('href'), $(e.relatedTarget).attr('href'));
+                });
             }
 
             function googleMapsInitialized() {

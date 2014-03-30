@@ -58,23 +58,24 @@ $cs->registerScriptFile($base_url . '/js/temporalDetailed.js', CClientScript::PO
             }
         });
 
-        $.getJSON("http://dev.infovis.com/temporal-view-data", function(data) {
-            $.temporalOverview({
-                svgSelector: '#overview > svg',
-                data: data,
-                onEventOccured: function(eventType, isSelected, eventArgs) {
-                    console.log(eventType, isSelected, eventArgs);
-                }
-            });
-
-            $.temporalDetailed({
-                svgSelector: '#detailed > svg',
-                data: data,
-                onEventOccured: function(eventType, isSelected, eventArgs) {
-                    console.log(eventType, isSelected, eventArgs);
-                }
-            });
-        });
+//        $.getJSON("http://dev.infovis.com/temporal-view-data", function(data) {
+//            console.log("WRONG WRONG WRONG!!");
+//            $.temporalOverview({
+//                svgSelector: '#overview > svg',
+//                data: data,
+//                onEventOccured: function(eventType, isSelected, eventArgs) {
+//                    console.log(eventType, isSelected, eventArgs);
+//                }
+//            });
+//
+//            $.temporalDetailed({
+//                svgSelector: '#detailed > svg',
+//                data: data,
+//                onEventOccured: function(eventType, isSelected, eventArgs) {
+//                    console.log(eventType, isSelected, eventArgs);
+//                }
+//            });
+//        });
 
         $('.js-tab-btn').click(function() {
             var targetID = $(this).data('href');

@@ -18,6 +18,15 @@
         no-repeat;
 }
 
+.div-modal {
+    display:    none;
+    position:   absolute;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    background: rgba( 255, 255, 255, .1);
+}
+
 html, body {
     height: 100%;
     margin: 0;
