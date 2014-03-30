@@ -199,6 +199,7 @@
                 }
             },
             renderKey: function() {
+                $('#keyDiv > svg').empty();
                 var keySVG = d3.select('#keyDiv > svg').attr("width", 600).attr("height", 150);
                 keySVG.append("line").attr("class", "xDivider")
                         .attr("x1", 0)
@@ -240,7 +241,7 @@
                             key.append("text").attr("class", "legendText")
                                     .attr("x", 130)
                                     .attr("y", 50)
-                                    .text("Fewer")
+                                    .text("0")
                                     .attr("style", "font-size: 10px; fill: #000000;")
                                     .attr("text-anchor", "start");
 
@@ -254,7 +255,7 @@
                             key.append("text").attr("class", "legendText")
                                     .attr("x", 310)
                                     .attr("y", 50)
-                                    .text("More")
+                                    .text(opts.maxVal)
                                     .attr("style", "font-size: 10px; fill: #000000;")
                                     .attr("text-anchor", "start");
 

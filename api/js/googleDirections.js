@@ -155,6 +155,9 @@
         getStackAreaData: function() {
             return opts.jsonData.area;
         },
+        getMaxCount: function() {
+            return opts.jsonData.temporal.max_count;
+        },
         setData: function(data) {
             opts.jsonData = data;
         }

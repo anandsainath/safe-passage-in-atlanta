@@ -1,5 +1,5 @@
 
-<?php //the theme file for the entire site.                                                                                                                                          ?>
+<?php //the theme file for the entire site.                                                                                                                                            ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -229,6 +229,7 @@
                     temporalOverview = $('#overview0').temporalOverview({
                         svgSelector: '#overview0 > svg',
                         data: $.googleDirections.getTemporalData(0),
+                        maxVal: $.googleDirections.getMaxCount(),
                         onEventOccured: function(eventType, isSelected, eventArgs) {
                             temporalDetailed.processEvent(eventType, isSelected, eventArgs);
                         }
@@ -237,6 +238,7 @@
                     temporalDetailed = $('#detailed0').temporalDetailed({
                         svgSelector: '#detailed0 > svg',
                         data: $.googleDirections.getTemporalData(0),
+                        maxVal: $.googleDirections.getMaxCount(),
                         onEventOccured: function(eventType, isSelected, eventArgs) {
                             temporalOverview.processEvent(eventType, isSelected, eventArgs);
                         }
@@ -250,6 +252,7 @@
                     leftTemporalOverview = $('#overview1').temporalOverview({
                         svgSelector: '#overview1 > svg',
                         data: $.googleDirections.getTemporalData(1),
+                        maxVal: $.googleDirections.getMaxCount(),
                         onEventOccured: function(eventType, isSelected, eventArgs) {
                             leftTemporalDetailed.processEvent(eventType, isSelected, eventArgs);
                         }
@@ -258,6 +261,7 @@
                     leftTemporalDetailed = $('#detailed1').temporalDetailed({
                         svgSelector: '#detailed1 > svg',
                         data: $.googleDirections.getTemporalData(1),
+                        maxVal: $.googleDirections.getMaxCount(),
                         onEventOccured: function(eventType, isSelected, eventArgs) {
                             temporalOverview.processEvent(eventType, isSelected, eventArgs);
                         }
@@ -269,6 +273,7 @@
                     rightTemporalOverview = $('#overview2').temporalOverview({
                         svgSelector: '#overview2 > svg',
                         data: $.googleDirections.getTemporalData(2),
+                        maxVal: $.googleDirections.getMaxCount(),
                         onEventOccured: function(eventType, isSelected, eventArgs) {
                             rightTemporalDetailed.processEvent(eventType, isSelected, eventArgs);
                         }
@@ -277,6 +282,7 @@
                     rightTemporalDetailed = $('#detailed2').temporalDetailed({
                         svgSelector: '#detailed2 > svg',
                         data: $.googleDirections.getTemporalData(2),
+                        maxVal: $.googleDirections.getMaxCount(),
                         onEventOccured: function(eventType, isSelected, eventArgs) {
                             rightTemporalOverview.processEvent(eventType, isSelected, eventArgs);
                         }

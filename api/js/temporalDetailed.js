@@ -193,6 +193,7 @@
                 opts.boundingRect.selectAll('.js-clicked').classed('js-clicked', false);
             },
             renderKey: function() {
+                $('#keyDiv > svg').empty();
                 var keySVG = d3.select('#keyDiv > svg').attr("width", 600).attr("height", 150);
                 keySVG.append("line").attr("class", "xDivider")
                         .attr("x1", 0)
@@ -236,7 +237,7 @@
                             key.append("text").attr("class", "legendText")
                                     .attr("x", 145)
                                     .attr("y", 58)
-                                    .text("Fewer")
+                                    .text("0")
                                     .attr("style", "font-size: 10px; fill: #000000;")
                                     .attr("text-anchor", "start");
 
@@ -250,7 +251,7 @@
                             key.append("text").attr("class", "legendText")
                                     .attr("x", 340)
                                     .attr("y", 58)
-                                    .text("More")
+                                    .text(opts.maxVal)
                                     .attr("style", "font-size: 10px; fill: #000000;")
                                     .attr("text-anchor", "start");
 
