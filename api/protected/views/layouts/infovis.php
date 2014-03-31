@@ -1,5 +1,5 @@
 
-<?php //the theme file for the entire site.                                                                                                                                                           ?>
+<?php //the theme file for the entire site.                                                                                                                                                            ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -26,7 +26,7 @@
         <![endif]-->
 
         <script type="text/javascript">
-            var transitMode = "drive",
+            var transitMode = "walk",
                     nodeLinkMode = 'actual',
                     thresholdValue = 0.001,
                     startString = undefined;
@@ -243,7 +243,6 @@
                             temporalOverview.processEvent(eventType, isSelected, eventArgs);
                         }
                     });
-
                     temporalOverview.renderKey();
                 }
 
@@ -344,13 +343,13 @@
             }
 
             function getOption(sel) {
-                if (sel.options[sel.selectedIndex].value == "Last year") {
+                if (sel.options[sel.selectedIndex].value === "Last year") {
                     var start = new Date();
                     var end = new Date();
                     start.setMonth(start.getMonth() - 12);
                     startString = dateToString(start);
 
-                } else if (sel.options[sel.selectedIndex].value == "Last 2 years") {
+                } else if (sel.options[sel.selectedIndex].value === "Last 2 years") {
                     var start = new Date();
                     var end = new Date();
                     start.setMonth(start.getMonth() - 24);
@@ -426,7 +425,7 @@
             }
 
             function requestDirections(start, end, wayPoints, routeToDisplay, main_route, transitMode) {
-                var travelMode = google.maps.TravelMode.DRIVING;
+                var travelMode = google.maps.TravelMode.WALKING;
                 switch (transitMode) {
                     case "private":
                         travelMode = google.maps.TravelMode.DRIVING;
