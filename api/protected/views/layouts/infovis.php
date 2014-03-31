@@ -1,5 +1,5 @@
 
-<?php //the theme file for the entire site.                                                                                                                                            ?>
+<?php //the theme file for the entire site.                                                                                                                                                           ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -410,57 +410,22 @@
                 map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
             }
 
-            function getRendererOptions(main_route)
-            {
-                if (main_route)
-                {
-                    var _colour = '#00458E';
-                    var _strokeWeight = 2;
-                    var _strokeOpacity = 1.0;
-                    var _suppressMarkers = false;
-                }
-                else
-                {
-                    var _colour = '#ED1C24';
-                    var _strokeWeight = 2;
-                    var _strokeOpacity = 1;
-                    var _suppressMarkers = false;
-                }
-
-                var polylineOptions = {strokeColor: _colour, strokeWeight: _strokeWeight, strokeOpacity: _strokeOpacity};
-
-                var rendererOptions = {draggable: false, suppressMarkers: _suppressMarkers, polylineOptions: polylineOptions};
-
+            function getRendererOptions(routeToDisplay) {
+                var _color = colors(parseInt(routeToDisplay));
+                console.log(routeToDisplay, _color);
+                var polylineOptions = {strokeColor: _color, strokeWeight: 2, strokeOpacity: 1};
+                var rendererOptions = {draggable: false, suppressMarkers: false, polylineOptions: polylineOptions};
                 return rendererOptions;
             }
 
-            function renderDirections(result, rendererOptions, routeToDisplay)
-            {
-
-
-                var _colour = colors(routeToDisplay);
-                var _strokeWeight = 2;
-                var _strokeOpacity = 1.0;
-                var _suppressMarkers = false;
-
-                // if (routeToDisplay == 0) _colour = "#FF0000";
-                // create new renderer object
-                directionsRenderer = new google.maps.DirectionsRenderer({
-                    draggable: false,
-                    suppressMarkers: _suppressMarkers,
-                    polylineOptions: {
-                        strokeColor: _colour,
-                        strokeWeight: _strokeWeight,
-                        strokeOpacity: _strokeOpacity
-                    }
-                });
+            function renderDirections(result, rendererOptions, routeToDisplay) {
+                directionsRenderer = new google.maps.DirectionsRenderer(getRendererOptions(routeToDisplay));
                 directionsRenderer.setMap(map);
-
                 directionsRenderer.setDirections(result);
                 directionsRenderer.setRouteIndex(routeToDisplay);
             }
 
-            function requestDirections(start, end, wayPoints, routeToDisplay, main_route) {
+            function requestDirections(start, end, wayPoints, routeToDisplay, main_route, transitMode) {
                 var travelMode = google.maps.TravelMode.DRIVING;
                 switch (transitMode) {
                     case "private":
@@ -484,18 +449,11 @@
                     waypoints: wayPoints
                 };
 
-
                 directionsService.route(request, function(result, status) {
-                    if (status == google.maps.DirectionsStatus.OK) {
-                        if (main_route) {
-                            var rendererOptions = getRendererOptions(true);
-                            for (var i = 0; i < result.routes.length; i++) {
-                                renderDirections(result, rendererOptions, i);
-                            }
-                        }
-                        else {
-                            var rendererOptions = getRendererOptions(false);
-                            renderDirections(result, rendererOptions, routeToDisplay);
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        for (var i = 0; i < result.routes.length; i++) {
+                            var rendererOptions = getRendererOptions(i);
+                            renderDirections(result, rendererOptions, i);
                         }
                     }
                 });
