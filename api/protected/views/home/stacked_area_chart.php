@@ -58,7 +58,7 @@ $cs->registerScriptFile($base_url . '/js/temporalDetailed.js', CClientScript::PO
             }
         });
 
-//        $.getJSON("http://dev.infovis.com/temporal-view-data", function(data) {
+//        $.getJSON("/temporal-view-data", function(data) {
 //            console.log("WRONG WRONG WRONG!!");
 //            $.temporalOverview({
 //                svgSelector: '#overview > svg',

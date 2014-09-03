@@ -11,7 +11,7 @@ $cs->registerScriptFile($base_url . '/js/temporalDetailed.js', CClientScript::PO
 
 <script type="text/javascript">
     $(function() {
-        $.getJSON("http://dev.infovis.com/temporal-view-data", function(data) {
+        $.getJSON("/temporal-view-data", function(data) {
             $.temporalOverview({
                 svgSelector: '#viz > svg',
                 data: data,

@@ -62,7 +62,7 @@
             if (opts.routeNum === undefined) {
                 opts.routeNum = 0;
             }
-            console.log(opts.routeNum, "route num");
+            //console.log(opts.routeNum, "route num");
             return opts.routeNum;
         },
         updateChart: function(crimeStatsData) {
@@ -107,7 +107,7 @@
         },
         showStackedChart: function(routeNum) {
             opts.routeNum = routeNum;
-            console.log(opts.directions.routes, routeNum);
+            //console.log(opts.directions.routes, routeNum);
             var routeLeg = opts.directions.routes[routeNum].legs[0];
             var totalDistance = routeLeg.distance.value;
             var xScale = d3.scale.linear().domain([0, totalDistance]).range([opts.dimension.xPadding, opts.dimension.chartWidth - opts.dimension.xPadding]);
@@ -160,7 +160,6 @@
                     .append("rect")
                     .attr("class", "heatMapElement")
                     .attr("x", function(datum) {
-//                        console.log("XPos", xScale(datum[0]));
                         return xScale(datum[0]);
                     })
                     .attr("y", opts.dimension.chartHeight - opts.dimension.xAxis.height - opts.dimension.marker.yPadding - 2)
@@ -169,7 +168,6 @@
                     })
                     .attr("height", opts.dimension.xAxis.height)
                     .attr("width", function(datum) {
-//                        console.log("Width", opts.dimension.chartWidth - xScale(datum[0]) - opts.dimension.xPadding);
                         return opts.dimension.chartWidth - xScale(datum[0]) - opts.dimension.xPadding;
                     });
 
@@ -222,12 +220,12 @@
         computeOverviewCoordinates: function(routeNum, totalDistance) {
             var wayPoints = [], points = [];
 
-            wayPoints.push({"x": opts.directions.routes[routeNum].legs[0].start_location.A, "y": opts.directions.routes[routeNum].legs[0].start_location.k});
+            wayPoints.push({"x": opts.directions.routes[routeNum].legs[0].start_location.lng(), "y": opts.directions.routes[routeNum].legs[0].start_location.lat()});
             $.each(opts.directions.routes[routeNum].legs[0].steps, function(index, steps) {
                 $.each(steps.path, function(index, point) {
-                    wayPoints.push({"x": point.A, "y": point.k});
+                    wayPoints.push({"x": point.lng(), "y": point.lat()});
                 });
-                wayPoints.push({"x": steps.end_location.A, "y": steps.end_location.k});
+                wayPoints.push({"x": steps.end_location.lng(), "y": steps.end_location.lat()});
             });
 
             var pathDistance = 0, temp, multiplier;
@@ -272,7 +270,7 @@
                 totalCrimeData[index][1] = totalCrimeData[index][1] / maxCrimePoint;
             }
 
-            console.log("Result", crimeStats, totalCrimeData);
+            //console.log("Result", crimeStats, totalCrimeData);
             return {
                 "summary": crimeStats,
                 "total": totalCrimeData

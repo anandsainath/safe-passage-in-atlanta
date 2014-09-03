@@ -129,7 +129,7 @@
                     };
 
                     opts.mapDirections = parsedResult;
-                    $.post('http://dev.infovis.com/get-data', {"json_string": JSON.stringify(parsedResult)}, function(data) {
+                    $.post('/get-data', {"json_string": JSON.stringify(parsedResult)}, function(data) {
                         opts.jsonData = $.parseJSON(data);
                         opts.onDataLoaded.call(this);
                         console.log(opts.jsonData);

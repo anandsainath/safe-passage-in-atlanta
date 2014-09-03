@@ -79,7 +79,7 @@
                 }
                 args.json_string = JSON.stringify($.googleDirections.getRoutes());
 
-                $.post('http://dev.infovis.com/update-stack-area', args, function(data) {
+                $.post('update-stack-area', args, function(data) {
                     $.stackChart.updateChart($.parseJSON(data));
                 });
             },

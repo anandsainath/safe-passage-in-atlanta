@@ -70,7 +70,7 @@
                         args.threshold = thresholdValue;
 
                         $('.modal').show();
-                        $.post('http://dev.infovis.com/get-data', args, function(data) {
+                        $.post('/get-data', args, function(data) {
                             $('#nodeLink > svg').children().remove();
                             $.googleDirections.setData($.parseJSON(data));
                             showNodeLink(nodeLinkMode);
@@ -364,7 +364,7 @@
                 args.threshold = thresholdValue;
 
                 $('.modal').show();
-                $.post('http://dev.infovis.com/get-data', args, function(data) {
+                $.post('/get-data', args, function(data) {
                     $('#nodeLink > svg').children().remove();
                     $.googleDirections.setData($.parseJSON(data));
                     showNodeLink(nodeLinkMode);
